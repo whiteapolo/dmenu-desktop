@@ -1,5 +1,5 @@
 # Variables
-CC = clang
+CC = cc
 CFLAGS = -Wall -Wextra -O3
 TARGET = dmenu-desktop
 PREFIX = ~/.local/bin
