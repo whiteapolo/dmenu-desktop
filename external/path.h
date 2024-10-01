@@ -106,6 +106,15 @@ void compressPath(char *path)
 	}
 }
 
+const char *nextInDir(DIR *dir)
+{
+	struct dirent *de;
+	de = readdir(dir);
+	if (de == NULL)
+		return NULL;
+	return de->d_name;
+}
+
 PATH_ERROR dirTraverse(const char *dir, bool (*action)(const char *))
 {
 	struct dirent *de;
