@@ -2,10 +2,15 @@
 #define PATH_H
 
 #include <stdarg.h>
+#include <dirent.h>
+#include <stdbool.h>
+#include <errno.h>
 
-typedef const char* PATH_ERROR;
+const int OK = 0;
+const int ERR = -1;
 
-void pathPrintError(const char *label, const PATH_ERROR e);
+const int READ = 0;
+const int WRITE = 1;
 
 int pathGetFmtSize(const char *fmt, ...);
 int pathGetFmtSizeVa(const char *fmt, va_list ap);
@@ -17,34 +22,29 @@ void expandPath(char *path, const int maxLen);
 void compressPath(char *path);
 bool isExtentionEqual(const char *path, const char *extention);
 
-PATH_ERROR dirTraverse(const char *dir, bool (*action)(const char *));
-PATH_ERROR traverseFile(const char *fileName, const int bufSize, bool (*action)(char[bufSize]));
+int dirTraverse(const char *dir, bool (*action)(const char *));
+int traverseFile(const char *fileName, const int bufSize, bool (*action)(char[bufSize]));
 
 bool isdir(const char *path);
 bool isregfile(const char *fileName);
 bool isfile(const char *fileName);
 
-PATH_ERROR echoFileWrite(const char *fileName, const char *fmt, ...);
-PATH_ERROR echoFileAppend(const char *fileName, const char *fmt, ...);
-PATH_ERROR readFile(const char *fileName, const char *fmt, ...);
-PATH_ERROR redirectFp(int srcFd, const char *dest);
+int echoFileWrite(const char *fileName, const char *fmt, ...);
+int echoFileAppend(const char *fileName, const char *fmt, ...);
+int readFile(const char *fileName, const char *fmt, ...);
+int redirectFp(int srcFd, const char *destFileName);
+int popen2(char *path, char *argv[], FILE *ppipe[2]);
+
+void getFullFileName(const char *dirName, const char *fileName, char *dest, int destLen);
+
+int nextInDir(DIR *dir, const char *dirName, char *destFileName, int destLen);
 
 #ifdef PATH_IMPL
 
-#include <dirent.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-
-const char *PATH_FILE_NOT_FOUND = "File not found";
-const char *PATH_SCANF_ERROR = "scanf error";
-const char *PATH_OK = NULL;
-
-void pathPrintError(const char *label, const PATH_ERROR e)
-{
-	printf("%s:%s", label, e);
-}
 
 int pathGetFmtSize(const char *fmt, ...)
 {
@@ -106,22 +106,23 @@ void compressPath(char *path)
 	}
 }
 
-const char *nextInDir(DIR *dir)
+int nextInDir(DIR *dir, const char *dirName, char *destFileName, int destLen)
 {
 	struct dirent *de;
 	de = readdir(dir);
 	if (de == NULL)
-		return NULL;
-	return de->d_name;
+		return ERR;
+	snprintf(destFileName, destLen, "%s/%s", dirName, de->d_name);
+	return OK;
 }
 
-PATH_ERROR dirTraverse(const char *dir, bool (*action)(const char *))
+int dirTraverse(const char *dir, bool (*action)(const char *))
 {
 	struct dirent *de;
 	DIR *dr = opendir(dir);
 
 	if (dr == NULL)
-		return PATH_FILE_NOT_FOUND;
+		return ERR;
 
 	while ((de = readdir(dr)) != NULL) {
 		const char *file = de->d_name;
@@ -133,7 +134,7 @@ PATH_ERROR dirTraverse(const char *dir, bool (*action)(const char *))
 	}
 
 	closedir(dr);
-	return PATH_OK;
+	return OK;
 }
 
 bool isExtentionEqual(const char *path, const char *extention)
@@ -160,7 +161,7 @@ bool isfile(const char *fileName)
 	return !access(fileName, F_OK);
 }
 
-PATH_ERROR echoFileWrite(const char *fileName, const char *fmt, ...)
+int echoFileWrite(const char *fileName, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -168,14 +169,14 @@ PATH_ERROR echoFileWrite(const char *fileName, const char *fmt, ...)
 	FILE *fp = fopen(fileName, "w");
 
 	if (fp == NULL)
-		return PATH_FILE_NOT_FOUND;
+		return ERR;
 
 	vfprintf(fp, fmt, ap);
 	va_end(ap);
-	return PATH_OK;
+	return OK;
 }
 
-PATH_ERROR echoFileAppend(const char *fileName, const char *fmt, ...)
+int echoFileAppend(const char *fileName, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -183,14 +184,14 @@ PATH_ERROR echoFileAppend(const char *fileName, const char *fmt, ...)
 	FILE *fp = fopen(fileName, "a");
 
 	if (fp == NULL)
-		return PATH_FILE_NOT_FOUND;
+		return ERR;
 
 	vfprintf(fp, fmt, ap);
 	va_end(ap);
-	return PATH_OK;
+	return OK;
 }
 
-PATH_ERROR readFile(const char *fileName, const char *fmt, ...)
+int readFile(const char *fileName, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -198,41 +199,81 @@ PATH_ERROR readFile(const char *fileName, const char *fmt, ...)
 	FILE *fp = fopen(fileName, "r");
 
 	if (fp == NULL)
-		return PATH_FILE_NOT_FOUND;
+		return ERR;
 
 	if (vfscanf(fp, fmt, ap) == EOF) {
         fclose(fp);
-		return PATH_SCANF_ERROR;
+		return ERR;
     }
 
 	va_end(ap);
     fclose(fp);
-	return PATH_OK;
+	return OK;
 }
 
-PATH_ERROR redirectFp(int srcFd, const char *dest)
+int redirectFp(int srcFd, const char *destFileName)
 {
-	int destFd = open(dest, O_WRONLY);
+	int destFd = open(destFileName, O_WRONLY);
 	if (destFd == -1)
-		return PATH_FILE_NOT_FOUND;
+		return ERR;
 
-	if (dup2(destFd, srcFd) == -1)
-		return "dup2 failed";
+	if (dup2(destFd, srcFd) == -1) {
+		close(destFd);
+		return ERR;
+	}
 
 	close(destFd);
-	return PATH_OK;
+	return OK;
 }
 
-PATH_ERROR traverseFile(const char *fileName, const int bufSize, bool (*action)(char[bufSize]))
+int traverseFile(const char *fileName, const int bufSize, bool (*action)(char[bufSize]))
 {
 	FILE *fp = fopen(fileName, "r");
 	if (fp == NULL)
-		return PATH_FILE_NOT_FOUND;
+		return ERR;
 
 	char buf[bufSize];
 	while (fgets(buf, bufSize, fp) && action(buf));
 
-	return PATH_OK;
+	return OK;
+}
+
+void getFullFileName(const char *dirName, const char *fileName, char *dest, int destLen)
+{
+	snprintf(dest, destLen, "%s/%s", dirName, fileName);
+}
+
+int popen2(char *path, char *argv[], FILE *ppipe[2])
+{
+	int output[2];
+	int input[2];
+
+	if (pipe(output) == -1 || pipe(input) == -1)
+		return ERR;
+
+	int pid = fork();
+
+	if (pid == -1)
+		return ERR;
+
+	if (pid) {
+		// parent
+		close(output[WRITE]);
+		ppipe[WRITE] = fdopen(input[WRITE], "w");
+		ppipe[READ] = fdopen(output[READ], "r");
+	} else {
+		// child
+		dup2(input[READ], STDIN_FILENO);
+		dup2(output[WRITE], STDOUT_FILENO);
+		close(input[WRITE]);
+		close(input[READ]);
+		close(output[WRITE]);
+		close(output[READ]);
+		execvp(path, argv);
+		exit(EXIT_FAILURE);
+	}
+
+	return OK;
 }
 
 #endif
