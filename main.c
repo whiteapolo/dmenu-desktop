@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #define PATH_IMPL
 #include "external/path.h"
@@ -27,22 +28,36 @@ void die(const char *s)
 	exit(EXIT_FAILURE);
 }
 
-void removeFieldCodes(char *s)
-{
-	while (*(s++)) {
-		if (*s == '%') {
-			memset(s, ' ', 2);
-			s += 2;
-		}
-	}
-}
-
 char strpoplast(char *s)
 {
 	char *end = s + strlen(s) - 1;
 	char c = *end;
 	*end = '\0';
 	return c;
+}
+
+void strtrim(char *s)
+{
+	if (*s == '\0')
+		return;
+
+	char *end = s + strlen(s) - 1;
+	while (end > s && isspace(*end))
+		end--;
+	*(end + 1) = '\0';
+}
+
+void removeFieldCodes(char *s)
+{
+	char *curr = s;
+	while (*curr != '\0') {
+		if (*curr == '%') {
+			memset(curr, ' ', 2);
+			curr++;
+		}
+		curr++;
+	}
+	strtrim(s);
 }
 
 int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
@@ -127,11 +142,10 @@ Result excuteProgram(const map programsMap, const char *programName)
 	return Err;
 }
 
-void printProgramName(const void *key, const void *data, va_list ap)
+void printProgramName(const void *key, const void *data, void *arg)
 {
 	(void)data;
-	FILE *out = va_arg(ap, FILE*);
-	fprintf(out, "%s\n", (const char *)key);
+	fprintf((FILE *)arg, "%s\n", (const char *)key);
 }
 
 int main(int, char **argv)
