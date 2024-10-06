@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -19,6 +20,12 @@ typedef struct {
 	char *name;
 	char *exec;
 } DesktopFile;
+
+void die(const char *s)
+{
+	perror(s);
+	exit(EXIT_FAILURE);
+}
 
 void removeFieldCodes(char *s)
 {
@@ -43,7 +50,7 @@ int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
 	FILE *fp = fopen(fileName, "r");
 
 	if (fp == NULL)
-		return -1;
+		return Err;
 
 	char *line = NULL;
 	size_t lineLen = 0;
@@ -62,19 +69,18 @@ int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
 	fclose(fp);
 
 	if (desktopFile->name && desktopFile->exec)
-		return 0;
+		return Ok;
 	free(desktopFile->name);
 	free(desktopFile->exec);
 	errno = EINVAL;
-	return -1;
+	return Err;
 }
 
-void proccessDesktopFile(const char *fileName, FILE *output, map *indexMap)
+void proccessDesktopFile(const char *fileName, map *indexMap)
 {
 	DesktopFile desktopFile;
 
-	if (parseDesktopFile(fileName, &desktopFile) == 0) {
-		fprintf(output, "%s\n", desktopFile.name);
+	if (parseDesktopFile(fileName, &desktopFile) == Ok) {
 		removeFieldCodes(desktopFile.exec);
 		mapInsert(indexMap, desktopFile.name, desktopFile.exec);
 	}
@@ -82,7 +88,7 @@ void proccessDesktopFile(const char *fileName, FILE *output, map *indexMap)
 	// no need to free desktopFile because we send it to mapInsert
 }
 
-void processDirectory(const char *dirPath, FILE *output, map *indexMap)
+void processDirectory(const char *dirPath, map *indexMap)
 {
 	DIR *dir = opendir(dirPath);
 
@@ -90,104 +96,67 @@ void processDirectory(const char *dirPath, FILE *output, map *indexMap)
 		return;
 
 	char fileName[PATH_MAX];
-	while (nextInDir(dir, dirPath, fileName, sizeof(fileName)) == OK)
+	while (nextInDir(dir, dirPath, fileName, sizeof(fileName)) == Ok)
 		if (isExtentionEqual(fileName, "desktop"))
-			proccessDesktopFile(fileName, output, indexMap);
+			proccessDesktopFile(fileName, indexMap);
 
 	closedir(dir);
 }
 
-void die(const char *s)
+map processDirectories(const char *dirs[])
 {
-	perror(s);
-	exit(EXIT_FAILURE);
+	map programsMap = newMap((cmpKeysType)strcmp);
+	for (int i = 0; dirs[i] != NULL; i++) {
+		char fullDirName[PATH_MAX];
+		snprintf(fullDirName, PATH_MAX, "%s", dirs[i]);
+		expandPath(fullDirName, PATH_MAX);
+		processDirectory(fullDirName, &programsMap);
+	}
+	return programsMap;
 }
 
-void pipe1(int pipedes[2])
+Result excuteProgram(const map programsMap, const char *programName)
 {
-	if (pipe(pipedes) == -1)
-		die("pipe() failed");
-}
-
-int fork1()
-{
-	const int pid = fork();
-	if (pid == -1)
-		die("fork() failed");
-	return pid;
-}
-
-int execCommandByName(const map execMap, const char *name)
-{
-	const char *command = (const char *)mapFind(execMap, name);
+	const char *command = (const char *)mapFind(programsMap, programName);
 
 	if (command != NULL && fork() == 0) {
-		redirectFp(STDOUT_FILENO, "/dev/null");
-		redirectFp(STDERR_FILENO, "/dev/null");
+		redirectFd(STDOUT_FILENO, "/dev/null");
+		redirectFd(STDERR_FILENO, "/dev/null");
 		return system(command);
 	}
-	return ERR;
+	return Err;
 }
 
-// void execInBackground(char *args[])
-// {
-// 	if (!fork())
-// 		execvp(args[0], args);
-// }
-
-void runDmenuChildProcess(int inputPipe[2], int outputPipe[2], char **argv)
+void printProgramName(const void *key, const void *data, va_list ap)
 {
-	dup2(inputPipe[0], STDIN_FILENO);
-	dup2(outputPipe[1], STDOUT_FILENO);
-
-	close(inputPipe[1]);
-	close(outputPipe[0]);
-
-	execvp(argv[0], argv);
-}
-
-bool getDmenuOutput(char *output, const int maxLen, const int outputFd)
-{
-	int len;
-	if ((len = read(outputFd, output, maxLen)) > 0) {
-		output[len] = '\0';
-		strpoplast(output);
-		return true;
-	}
-	return false;
-}
-
-void processDirectories(const char *dirs[], FILE *output, map *indexMap)
-{
-	while (*dirs != NULL) {
-		char fullDirName[PATH_MAX];
-		snprintf(fullDirName, PATH_MAX, "%s", *dirs);
-		expandPath(fullDirName, PATH_MAX);
-		processDirectory(fullDirName, output, indexMap);
-		dirs++;
-	}
+	(void)data;
+	FILE *out = va_arg(ap, FILE*);
+	fprintf(out, "%s\n", (const char *)key);
 }
 
 int main(int, char **argv)
 {
 	FILE *pipe[2];
-	map execMap = newMap((cmpKeysType)strcmp);
 	argv[0] = "dmenu";
 
-	if (popen2("dmenu", argv, pipe) == ERR)
+	// open dmenu in bidirectional pipe
+	if (popen2("dmenu", argv, pipe) == Err)
 		die("popen2()");
 
-	processDirectories(desktopAppsPath, pipe[WRITE], &execMap);
-	fclose(pipe[WRITE]);
+	// pipe program names to dmenu
+	map programsMap = processDirectories(desktopAppsPath);
+	mapOrderTraverse(programsMap, printProgramName, pipe[Write]);
+	fclose(pipe[Write]);
 
+	// read dmenu output
 	char *buf = NULL;
 	size_t bufLen = 0;
-	if (getline(&buf, &bufLen, pipe[READ]) > 0) {
+	if (getline(&buf, &bufLen, pipe[Read]) > 0) {
 		strpoplast(buf); // remove new line
-		execCommandByName(execMap, buf);
+		excuteProgram(programsMap, buf);
 	}
 
 	free(buf);
-	fclose(pipe[READ]);
-	mapFree(execMap, free, free);
+	fclose(pipe[Read]);
+	mapFree(programsMap, free, free);
 }

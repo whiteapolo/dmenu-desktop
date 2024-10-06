@@ -6,11 +6,15 @@
 #include <stdbool.h>
 #include <errno.h>
 
-const int OK = 0;
-const int ERR = -1;
+typedef enum {
+	Ok = 0,
+	Err = -1,
+} Result;
 
-const int READ = 0;
-const int WRITE = 1;
+typedef enum {
+	Read = 0,
+	Write = 1,
+} PipeMode;
 
 int pathGetFmtSize(const char *fmt, ...);
 int pathGetFmtSizeVa(const char *fmt, va_list ap);
@@ -32,7 +36,7 @@ bool isfile(const char *fileName);
 int echoFileWrite(const char *fileName, const char *fmt, ...);
 int echoFileAppend(const char *fileName, const char *fmt, ...);
 int readFile(const char *fileName, const char *fmt, ...);
-int redirectFp(int srcFd, const char *destFileName);
+int redirectFd(int srcFd, const char *destFileName);
 int popen2(char *path, char *argv[], FILE *ppipe[2]);
 
 void getFullFileName(const char *dirName, const char *fileName, char *dest, int destLen);
@@ -106,23 +110,23 @@ void compressPath(char *path)
 	}
 }
 
-int nextInDir(DIR *dir, const char *dirName, char *destFileName, int destLen)
+Result nextInDir(DIR *dir, const char *dirName, char *destFileName, int destLen)
 {
 	struct dirent *de;
 	de = readdir(dir);
 	if (de == NULL)
-		return ERR;
+		return Err;
 	snprintf(destFileName, destLen, "%s/%s", dirName, de->d_name);
-	return OK;
+	return Ok;
 }
 
-int dirTraverse(const char *dir, bool (*action)(const char *))
+Result dirTraverse(const char *dir, bool (*action)(const char *))
 {
 	struct dirent *de;
 	DIR *dr = opendir(dir);
 
 	if (dr == NULL)
-		return ERR;
+		return Err;
 
 	while ((de = readdir(dr)) != NULL) {
 		const char *file = de->d_name;
@@ -134,7 +138,7 @@ int dirTraverse(const char *dir, bool (*action)(const char *))
 	}
 
 	closedir(dr);
-	return OK;
+	return Ok;
 }
 
 bool isExtentionEqual(const char *path, const char *extention)
@@ -161,7 +165,7 @@ bool isfile(const char *fileName)
 	return !access(fileName, F_OK);
 }
 
-int echoFileWrite(const char *fileName, const char *fmt, ...)
+Result echoFileWrite(const char *fileName, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -169,14 +173,14 @@ int echoFileWrite(const char *fileName, const char *fmt, ...)
 	FILE *fp = fopen(fileName, "w");
 
 	if (fp == NULL)
-		return ERR;
+		return Err;
 
 	vfprintf(fp, fmt, ap);
 	va_end(ap);
-	return OK;
+	return Ok;
 }
 
-int echoFileAppend(const char *fileName, const char *fmt, ...)
+Result echoFileAppend(const char *fileName, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -184,14 +188,14 @@ int echoFileAppend(const char *fileName, const char *fmt, ...)
 	FILE *fp = fopen(fileName, "a");
 
 	if (fp == NULL)
-		return ERR;
+		return Err;
 
 	vfprintf(fp, fmt, ap);
 	va_end(ap);
-	return OK;
+	return Ok;
 }
 
-int readFile(const char *fileName, const char *fmt, ...)
+Result readFile(const char *fileName, const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -199,43 +203,43 @@ int readFile(const char *fileName, const char *fmt, ...)
 	FILE *fp = fopen(fileName, "r");
 
 	if (fp == NULL)
-		return ERR;
+		return Err;
 
 	if (vfscanf(fp, fmt, ap) == EOF) {
         fclose(fp);
-		return ERR;
+		return Err;
     }
 
 	va_end(ap);
     fclose(fp);
-	return OK;
+	return Ok;
 }
 
-int redirectFp(int srcFd, const char *destFileName)
+Result redirectFd(int srcFd, const char *destFileName)
 {
 	int destFd = open(destFileName, O_WRONLY);
 	if (destFd == -1)
-		return ERR;
+		return Err;
 
 	if (dup2(destFd, srcFd) == -1) {
 		close(destFd);
-		return ERR;
+		return Err;
 	}
 
 	close(destFd);
-	return OK;
+	return Ok;
 }
 
-int traverseFile(const char *fileName, const int bufSize, bool (*action)(char[bufSize]))
+Result traverseFile(const char *fileName, const int bufSize, bool (*action)(char[bufSize]))
 {
 	FILE *fp = fopen(fileName, "r");
 	if (fp == NULL)
-		return ERR;
+		return Err;
 
 	char buf[bufSize];
 	while (fgets(buf, bufSize, fp) && action(buf));
 
-	return OK;
+	return Ok;
 }
 
 void getFullFileName(const char *dirName, const char *fileName, char *dest, int destLen)
@@ -243,37 +247,37 @@ void getFullFileName(const char *dirName, const char *fileName, char *dest, int 
 	snprintf(dest, destLen, "%s/%s", dirName, fileName);
 }
 
-int popen2(char *path, char *argv[], FILE *ppipe[2])
+Result popen2(char *path, char *argv[], FILE *ppipe[2])
 {
 	int output[2];
 	int input[2];
 
 	if (pipe(output) == -1 || pipe(input) == -1)
-		return ERR;
+		return Err;
 
 	int pid = fork();
 
 	if (pid == -1)
-		return ERR;
+		return Err;
 
 	if (pid) {
 		// parent
-		close(output[WRITE]);
-		ppipe[WRITE] = fdopen(input[WRITE], "w");
-		ppipe[READ] = fdopen(output[READ], "r");
+		close(output[Write]);
+		ppipe[Write] = fdopen(input[Write], "w");
+		ppipe[Read] = fdopen(output[Read], "r");
 	} else {
 		// child
-		dup2(input[READ], STDIN_FILENO);
-		dup2(output[WRITE], STDOUT_FILENO);
-		close(input[WRITE]);
-		close(input[READ]);
-		close(output[WRITE]);
-		close(output[READ]);
+		dup2(input[Read], STDIN_FILENO);
+		dup2(output[Write], STDOUT_FILENO);
+		close(input[Write]);
+		close(input[Read]);
+		close(output[Write]);
+		close(output[Read]);
 		execvp(path, argv);
 		exit(EXIT_FAILURE);
 	}
 
-	return OK;
+	return Ok;
 }
 
 #endif

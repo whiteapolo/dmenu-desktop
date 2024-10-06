@@ -1,6 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <stdarg.h>
+
 #define ADDR(element) (&((typeof(element)){element}))
 #define DUP_VAL(value) memdup(ADDR(value), sizeof(value))
 
@@ -24,7 +26,7 @@ const map EMPTY_MAP = {0};
 
 map newMap(int (*cmpKeys)(const void *, const void *));
 
-map newMapFrom(int (*cmpKeys)(const void *, const void *), 
+map newMapFrom(int (*cmpKeys)(const void *, const void *),
 			   void *key, void *data, ...);
 
 void mapInsert(map *m, void *key, void *data);
@@ -38,20 +40,21 @@ void *mapFind(const map m, const void *key);
 
 bool mapIsExists(const map m, const void *key);
 
-void mapRemove(map *m, 
-		       const void *key, 
-			   void (*freeKey)(void *), 
+void mapRemove(map *m,
+		       const void *key,
+			   void (*freeKey)(void *),
 			   void (*freeData)(void *));
 
-void mapUpdate(map m, 
-		       const void *key, 
+void mapUpdate(map m,
+		       const void *key,
 		       void (*freeData)(void *),
 			   void *newData);
 
-void mapOrderTraverse(map m, 
-                      void (*action)(const void *key, const void *data));
+void mapOrderTraverse(const map m,
+                      void (*action)(const void *key, const void *data, va_list ap),
+					  ...);
 
-void mapFree(map m, 
+void mapFree(map m,
 		     void (*freeKey)(void *),
 		     void (*freeData)(void *));
 
@@ -155,8 +158,8 @@ void rightLeftRotate(avlNode **root)
 	leftRotate(root);
 }
 
-const avlNode *findAvlNode(const avlNode *root, 
-		                   const void *key, 
+const avlNode *findAvlNode(const avlNode *root,
+		                   const void *key,
 						   int (*cmpKeys)(const void *,const void *))
 {
 	int cmpRes;
@@ -169,15 +172,15 @@ const avlNode *findAvlNode(const avlNode *root,
 	return root;
 }
 
-bool avlIsExists(const avlNode *root, 
-		         const void *key, 
+bool avlIsExists(const avlNode *root,
+		         const void *key,
 				 int (*cmpKeys)(const void *,const void *))
 {
 	return findAvlNode(root, key, cmpKeys) != NULL;
 }
 
-void *avlFind(const avlNode *root, 
-		      const void *key, 
+void *avlFind(const avlNode *root,
+		      const void *key,
 			  int (*cmpKeys)(const void *,const void *))
 {
 	const avlNode *node = findAvlNode(root, key, cmpKeys);
@@ -186,9 +189,9 @@ void *avlFind(const avlNode *root,
 	return NULL;
 }
 
-void avlInsert(avlNode **root, 
-		       void *key, 
-			   void *data, 
+void avlInsert(avlNode **root,
+		       void *key,
+			   void *data,
 			   int (*cmpKeys)(const void *,const void *))
 {
 	if (*root == NULL)
@@ -219,8 +222,8 @@ void avlInsert(avlNode **root,
 		rightLeftRotate(root);
 }
 
-void avlRemove(avlNode **root, 
-		       const void *key, 
+void avlRemove(avlNode **root,
+		       const void *key,
 			   int (*cmpKeys)(const void *,const void *),
 			   void (*freeKey)(void *),
 			   void (*freeData)(void *))
@@ -279,10 +282,10 @@ void avlRemove(avlNode **root,
 	return;
 }
 
-void avlUpdate(avlNode *root, 
-		       const void *key, 
+void avlUpdate(avlNode *root,
+		       const void *key,
 			   int (*cmpKeys)(const void *,const void *),
-			   void (*freeData)(void *), 
+			   void (*freeData)(void *),
 			   void *newData)
 {
 	avlNode *node = (avlNode *)findAvlNode(root, key, cmpKeys);
@@ -296,18 +299,28 @@ void avlUpdate(avlNode *root,
 	node->data = newData;
 }
 
-void avlOrderTraverse(avlNode *root, 
-                      void (*action)(const void *key, const void *data))
+void avlOrderTraverse(const avlNode *root,
+                      void (*action)(const void *key, const void *data, va_list ap),
+					  va_list ap)
 {
-    if (root == NULL)
-        return;
+	if (root == NULL)
+		return;
 
-    avlOrderTraverse(root->left, action);
-    action(root->key, root->data);
-    avlOrderTraverse(root->right, action);
+	va_list ap1;
+	va_list ap2;
+	va_list ap3;
+	va_copy(ap1, ap);
+	va_copy(ap2, ap);
+	va_copy(ap3, ap);
+    avlOrderTraverse(root->left, action, ap1);
+    action(root->key, root->data, ap2);
+    avlOrderTraverse(root->right, action, ap3);
+	va_end(ap1);
+	va_end(ap2);
+	va_end(ap3);
 }
 
-void avlFree(avlNode *root, 
+void avlFree(avlNode *root,
 		     void (*freeKey)(void *),
 		     void (*freeData)(void *))
 {
@@ -334,7 +347,7 @@ map newMap(int (*cmpKeys)(const void *, const void *))
 	return m;
 }
 
-map newMapFrom(int (*cmpKeys)(const void *, const void *), 
+map newMapFrom(int (*cmpKeys)(const void *, const void *),
 			   void *key, void *data, ...)
 {
 	map m = newMap(cmpKeys);
@@ -382,26 +395,30 @@ bool mapIsExists(const map m, const void *key)
 	return avlIsExists(m.root, key, m.cmpKeys);
 }
 
-void mapRemove(map *m, 
-		       const void *key, 
-			   void (*freeKey)(void *), 
+void mapRemove(map *m,
+		       const void *key,
+			   void (*freeKey)(void *),
 			   void (*freeData)(void *))
 {
 	return avlRemove(&m->root, key, m->cmpKeys, freeKey, freeData);
 }
 
-void mapUpdate(map m, 
-		       const void *key, 
-		       void (*freeData)(void *), 
+void mapUpdate(map m,
+		       const void *key,
+		       void (*freeData)(void *),
 			   void *newData)
 {
 	avlUpdate(m.root, key, m.cmpKeys, freeData, newData);
 }
 
-void mapOrderTraverse(map m, 
-                      void (*action)(const void *key, const void *data))
+void mapOrderTraverse(const map m,
+                      void (*action)(const void *key, const void *data, va_list ap),
+					  ...)
 {
-    avlOrderTraverse(m.root, action);
+	va_list ap;
+	va_start(ap, action);
+    avlOrderTraverse(m.root, action, ap);
+	va_end(ap);
 }
 
 bool mapIsEmpty(map m)
@@ -409,7 +426,7 @@ bool mapIsEmpty(map m)
     return m.root == NULL;
 }
 
-void mapFree(map m, 
+void mapFree(map m,
 		     void (*freeKey)(void *),
 		     void (*freeData)(void *))
 {
