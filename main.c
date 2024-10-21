@@ -70,20 +70,18 @@ int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
 	if (fp == NULL)
 		return Err;
 
-	char *line = NULL;
-	size_t lineLen = 0;
+	Scanner scanner = newScanner(fp);
 	desktopFile->name = NULL;
 	desktopFile->exec = NULL;
-
-	while (getline(&line, &lineLen, fp) > 0) {
-		strpoplast(line); // remove new line
-		if (desktopFile->name == NULL && strncmp(line, "Name=", 5) == 0)
-			desktopFile->name = strdup(line + 5);
-		else if (desktopFile->exec == NULL && strncmp(line, "Exec=", 5) == 0)
-			desktopFile->exec = strdup(line + 5);
+	const string *line;
+	while ((line = scannerNextLine(&scanner)) != NULL) {
+		if (desktopFile->name == NULL && strncmp(line->data, "Name=", 5) == 0)
+			desktopFile->name = strdup(line->data + 5);
+		else if (desktopFile->exec == NULL && strncmp(line->data, "Exec=", 5) == 0)
+			desktopFile->exec = strdup(line->data + 5);
 	}
 
-	free(line);
+	scannerFree(&scanner);
 	fclose(fp);
 
 	if (desktopFile->name && desktopFile->exec)
