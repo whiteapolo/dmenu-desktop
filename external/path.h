@@ -1,20 +1,16 @@
 #ifndef PATH_H
 #define PATH_H
-
 #include <stdarg.h>
 #include <dirent.h>
 #include <stdbool.h>
 #include <errno.h>
 
-typedef enum {
-	Ok = 0,
-	Err = -1,
-} Result;
+#ifndef RESULT
+#define RESULT
+typedef enum { Ok = 0, Err = -1, } Result;
+#endif
 
-typedef enum {
-	Read = 0,
-	Write = 1,
-} PipeMode;
+typedef enum { Read = 0, Write = 1, } PipeMode;
 
 int pathGetFmtSize(const char *fmt, ...);
 int pathGetFmtSizeVa(const char *fmt, va_list ap);
@@ -44,11 +40,11 @@ void getFullFileName(const char *dirName, const char *fileName, char *dest, int 
 int nextInDir(DIR *dir, const char *dirName, char *destFileName, int destLen);
 
 #ifdef PATH_IMPL
-
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
 int pathGetFmtSize(const char *fmt, ...)
 {
@@ -281,5 +277,4 @@ Result popen2(char *path, char *argv[], FILE *ppipe[2])
 }
 
 #endif
-
 #endif

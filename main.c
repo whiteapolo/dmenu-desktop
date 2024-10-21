@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#define STRING_IMPL
+#include "external/string.h"
+
 #define PATH_IMPL
 #include "external/path.h"
 
@@ -130,7 +133,7 @@ map processDirectories(const char *dirs[])
 	return programsMap;
 }
 
-Result excuteProgram(const map programsMap, const char *programName)
+Result excuteProgram(const map *programsMap, const char *programName)
 {
 	const char *command = (const char *)mapFind(programsMap, programName);
 
@@ -159,7 +162,7 @@ int main(int, char **argv)
 
 	// pipe program names to dmenu
 	map programsMap = processDirectories(desktopAppsPath);
-	mapOrderTraverse(programsMap, printProgramName, pipe[Write]);
+	mapOrderTraverse(&programsMap, printProgramName, pipe[Write]);
 	fclose(pipe[Write]);
 
 	// read dmenu output
@@ -167,10 +170,10 @@ int main(int, char **argv)
 	size_t bufLen = 0;
 	if (getline(&buf, &bufLen, pipe[Read]) > 0) {
 		strpoplast(buf); // remove new line
-		excuteProgram(programsMap, buf);
+		excuteProgram(&programsMap, buf);
 	}
 
 	free(buf);
 	fclose(pipe[Read]);
-	mapFree(programsMap, free, free);
+	mapFree(&programsMap, free, free);
 }
