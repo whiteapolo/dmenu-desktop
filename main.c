@@ -75,10 +75,11 @@ int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
 	desktopFile->exec = NULL;
 	const string *line;
 	while ((line = scannerNextLine(&scanner)) != NULL) {
-		if (desktopFile->name == NULL && strncmp(line->data, "Name=", 5) == 0)
-			desktopFile->name = strdup(line->data + 5);
-		else if (desktopFile->exec == NULL && strncmp(line->data, "Exec=", 5) == 0)
-			desktopFile->exec = strdup(line->data + 5);
+		const char *lineptr = line->data;
+		if (desktopFile->name == NULL && strncmp(lineptr, "Name=", 5) == 0)
+			desktopFile->name = strdup(lineptr + 5);
+		else if (desktopFile->exec == NULL && strncmp(lineptr, "Exec=", 5) == 0)
+			desktopFile->exec = strdup(lineptr + 5);
 	}
 
 	scannerFree(&scanner);
