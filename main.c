@@ -153,10 +153,10 @@ void printProgramName(const void *key, const void *data, void *arg)
 int main(int, char **argv)
 {
 	FILE *pipe[2];
-	argv[0] = "dmenu";
+	argv[0] = "/home/white/.local/bin/dmenu";
 
 	// open dmenu in bidirectional pipe
-	if (popen2("dmenu", argv, pipe) == Err)
+	if (popen2("/home/white/.local/bin/dmenu", argv, pipe) == Err)
 		die("popen2()");
 
 	// pipe program names to dmenu
