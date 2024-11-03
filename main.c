@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include "libzatar/include/shared.h"
 #include "libzatar/include/str.h"
 #include "libzatar/include/map.h"
 #include "libzatar/include/path.h"
@@ -17,9 +18,22 @@ const char *desktopAppsPath[] = {
 };
 
 typedef struct {
-	char *name;
-	char *exec;
+	string name;
+	string exec;
 } DesktopFile;
+
+int cmpString(const void *a, const void *b)
+{
+	const string *s1 = a;
+	const string *s2 = b;
+	return strCmp(*s1, *s2);
+}
+
+void freeStr(void *s)
+{
+	string *str = s;
+	strFree(str);
+}
 
 void die(const char *s)
 {
@@ -35,70 +49,52 @@ char strpoplast(char *s)
 	return c;
 }
 
-void strtrim(char *s)
+void removeFieldCodes(string *s)
 {
-	if (*s == '\0')
-		return;
-
-	char *end = s + strlen(s) - 1;
-	while (end > s && isspace(*end))
-		end--;
-	*(end + 1) = '\0';
-}
-
-void removeFieldCodes(char *s)
-{
-	char *curr = s;
-	while (*curr != '\0') {
-		if (*curr == '%') {
-			memset(curr, ' ', 2);
-			curr++;
-		}
-		curr++;
-	}
-	strtrim(s);
+	for (size_t i = 0; i < s->len; i++)
+		if (s->data[i] == '%')
+			memset(&s->data[i], ' ', 2);
+	strTrim(s);
 }
 
 int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
 {
-	FILE *fp = fopen(fileName, "r");
-
-	if (fp == NULL)
+	string f = readWholeFile(fileName);
+	if (strIsEmpty(f))
 		return Err;
+	strSlice line = strTokStart(f, "\n");
 
-	Scanner scanner = newScanner(fp);
-	desktopFile->name = NULL;
-	desktopFile->exec = NULL;
-	const string *line;
-	while ((line = scannerNextLine(&scanner)) != NULL) {
-		const char *lineptr = line->data;
-		if (desktopFile->name == NULL && strncmp(lineptr, "Name=", 5) == 0)
-			desktopFile->name = strdup(lineptr + 5);
-		else if (desktopFile->exec == NULL && strncmp(lineptr, "Exec=", 5) == 0)
-			desktopFile->exec = strdup(lineptr + 5);
+	desktopFile->name = newStr("");
+	desktopFile->exec = newStr("");
+
+	while (!strIsEmpty(line)) {
+		if (strIsEmpty(desktopFile->name) && strnIsEqualC(line, "Name=", 5))
+			desktopFile->name = newStrSlice(line, 5, -1, 1);
+		if (strIsEmpty(desktopFile->exec) && strnIsEqualC(line, "Exec=", 5))
+			desktopFile->exec = newStrSlice(line, 5, -1, 1);
+		line = strTok(f, line, "\n");
 	}
 
-	scannerFree(&scanner);
-	fclose(fp);
+	strFree(&f);
 
-	if (desktopFile->name && desktopFile->exec)
-		return Ok;
-	free(desktopFile->name);
-	free(desktopFile->exec);
-	errno = EINVAL;
-	return Err;
+	if (strIsEmpty(desktopFile->name) || strIsEmpty(desktopFile->exec)) {
+		strFree(&desktopFile->name);
+		strFree(&desktopFile->exec);
+		return Err;
+	}
+	return Ok;
 }
 
 void proccessDesktopFile(const char *fileName, map *indexMap)
 {
-	DesktopFile desktopFile;
+	DesktopFile *desktopFile = malloc(sizeof(DesktopFile));
 
-	if (parseDesktopFile(fileName, &desktopFile) == Ok) {
-		removeFieldCodes(desktopFile.exec);
-		mapInsert(indexMap, desktopFile.name, desktopFile.exec);
+	if (parseDesktopFile(fileName, desktopFile) == Ok) {
+		removeFieldCodes(&desktopFile->exec);
+		mapInsert(indexMap, &desktopFile->name, &desktopFile->exec);
+	} else {
+		free(desktopFile);
 	}
-
-	// no need to free desktopFile because we send it to mapInsert
 }
 
 void processDirectory(const char *dirPath, map *indexMap)
@@ -118,7 +114,7 @@ void processDirectory(const char *dirPath, map *indexMap)
 
 map processDirectories(const char *dirs[])
 {
-	map programsMap = newMap((cmpKeysType)strcmp);
+	map programsMap = newMap(cmpString);
 	for (int i = 0; dirs[i] != NULL; i++) {
 		char fullDirName[PATH_MAX];
 		snprintf(fullDirName, PATH_MAX, "%s", dirs[i]);
@@ -128,14 +124,15 @@ map processDirectories(const char *dirs[])
 	return programsMap;
 }
 
-Result excuteProgram(const map *programsMap, const char *programName)
+Result excuteProgram(const map *programsMap, const strSlice *programName)
 {
-	const char *command = (const char *)mapFind(programsMap, programName);
+	const string *command = mapFind(programsMap, programName);
 
 	if (command != NULL && fork() == 0) {
+		strPrintln(*command);
 		redirectFd(STDOUT_FILENO, "/dev/null");
 		redirectFd(STDERR_FILENO, "/dev/null");
-		return system(command);
+		return system(command->data);
 	}
 	return Err;
 }
@@ -143,7 +140,8 @@ Result excuteProgram(const map *programsMap, const char *programName)
 void printProgramName(const void *key, const void *data, void *arg)
 {
 	(void)data;
-	fprintf((FILE *)arg, "%s\n", (const char *)key);
+	const string *strKey = key;
+	fprintf((FILE *)arg, "%s\n", strKey->data);
 }
 
 int main(int, char **argv)
@@ -161,14 +159,12 @@ int main(int, char **argv)
 	fclose(pipe[Write]);
 
 	// read dmenu output
-	char *buf = NULL;
-	size_t bufLen = 0;
-	if (getline(&buf, &bufLen, pipe[Read]) > 0) {
-		strpoplast(buf); // remove new line
-		excuteProgram(&programsMap, buf);
+	string output = strGetLine(pipe[Read]);
+	if (!strIsEmpty(output)) {
+		excuteProgram(&programsMap, &output);
+		strFree(&output);
 	}
 
-	free(buf);
 	fclose(pipe[Read]);
-	mapFree(&programsMap, free, free);
+	mapFree(&programsMap, freeStr, freeStr);
 }
