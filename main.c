@@ -3,15 +3,11 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <unistd.h>
 
-#define STRING_IMPL
-#include "external/string.h"
-
-#define PATH_IMPL
-#include "external/path.h"
-
-#define MAP_IMPL
-#include "external/map.h"
+#include "libzatar/include/str.h"
+#include "libzatar/include/map.h"
+#include "libzatar/include/path.h"
 
 const char *desktopAppsPath[] = {
 	"/usr/share/applications",
