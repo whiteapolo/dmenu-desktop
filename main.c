@@ -33,6 +33,7 @@ void freeStr(void *s)
 {
 	string *str = s;
 	strFree(str);
+	free(s);
 }
 
 void die(const char *s)
@@ -51,10 +52,17 @@ char strpoplast(char *s)
 
 void removeFieldCodes(string *s)
 {
-	for (size_t i = 0; i < s->len; i++)
+	string tmp = newStr("");
+	size_t i = 0;
+	while (i < s->len) {
 		if (s->data[i] == '%')
-			memset(&s->data[i], ' ', 2);
-	strTrim(s);
+			i += 2;
+		else
+			strPushc(&tmp, s->data[i++]);
+	}
+
+	strFree(s);
+	*s = tmp;
 }
 
 int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
@@ -64,8 +72,8 @@ int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
 		return Err;
 	strSlice line = strTokStart(f, "\n");
 
-	desktopFile->name = newStr("");
-	desktopFile->exec = newStr("");
+	desktopFile->name = EMPTY_STR;
+	desktopFile->exec = EMPTY_STR;
 
 	while (!strIsEmpty(line)) {
 		if (strIsEmpty(desktopFile->name) && strnIsEqualC(line, "Name=", 5))
@@ -85,19 +93,21 @@ int parseDesktopFile(const char *fileName, DesktopFile *desktopFile)
 	return Ok;
 }
 
-void proccessDesktopFile(const char *fileName, map *indexMap)
+void proccessDesktopFile(const char *fileName, map *programsMap)
 {
-	DesktopFile *desktopFile = malloc(sizeof(DesktopFile));
+	DesktopFile desktopFile;
 
-	if (parseDesktopFile(fileName, desktopFile) == Ok) {
-		removeFieldCodes(&desktopFile->exec);
-		mapInsert(indexMap, &desktopFile->name, &desktopFile->exec);
-	} else {
-		free(desktopFile);
+	if (parseDesktopFile(fileName, &desktopFile) == Ok) {
+		removeFieldCodes(&desktopFile.exec);
+		strTrim(&desktopFile.exec);
+		strTrim(&desktopFile.name);
+		void *key = memdup(&desktopFile.name, sizeof(string));
+		void *data = memdup(&desktopFile.exec, sizeof(string));
+		mapInsert(programsMap, key, data);
 	}
 }
 
-void processDirectory(const char *dirPath, map *indexMap)
+void processDirectory(const char *dirPath, map *programsMap)
 {
 	DIR *dir = opendir(dirPath);
 
@@ -107,7 +117,7 @@ void processDirectory(const char *dirPath, map *indexMap)
 	char fileName[PATH_MAX];
 	while (nextInDir(dir, dirPath, fileName, sizeof(fileName)) == Ok)
 		if (isExtentionEqual(fileName, "desktop"))
-			proccessDesktopFile(fileName, indexMap);
+			proccessDesktopFile(fileName, programsMap);
 
 	closedir(dir);
 }
@@ -129,7 +139,6 @@ Result excuteProgram(const map *programsMap, const strSlice *programName)
 	const string *command = mapFind(programsMap, programName);
 
 	if (command != NULL && fork() == 0) {
-		strPrintln(*command);
 		redirectFd(STDOUT_FILENO, "/dev/null");
 		redirectFd(STDERR_FILENO, "/dev/null");
 		return system(command->data);
@@ -161,6 +170,7 @@ int main(int, char **argv)
 	// read dmenu output
 	string output = strGetLine(pipe[Read]);
 	if (!strIsEmpty(output)) {
+		strTrim(&output);
 		excuteProgram(&programsMap, &output);
 		strFree(&output);
 	}
