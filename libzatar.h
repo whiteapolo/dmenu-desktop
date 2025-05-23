@@ -906,7 +906,7 @@ typedef struct {
 bool _z_should_rebuild(const char *target, ...);
 bool z_should_rebuild_va(const char *target, va_list ap);
 #define z_should_rebuild(target, ...) _z_should_rebuild(target, ##__VA_ARGS__, NULL)
-void z_rebuild_yourself(const char *src_pathname, const char *executable_pathname);
+void z_rebuild_yourself(const char *src_pathname, char **argv);
 void z_cmd_init(Z_Cmd *cmd);
 #define z_cmd_append(cmd, ...) _z_cmd_append(cmd, __VA_ARGS__, NULL)
 void _z_cmd_append(Z_Cmd *cmd, ...);
@@ -1732,20 +1732,20 @@ bool z_should_rebuild_va(const char *target, va_list ap)
     return false;
 }
 
-void z_rebuild_yourself(const char *src_pathname, const char *executable_pathname)
+void z_rebuild_yourself(const char *src_pathname, char **argv)
 {
-    if (!z_should_rebuild(executable_pathname, src_pathname, __FILE__)) {
+    if (!z_should_rebuild(argv[0], src_pathname, __FILE__)) {
         return;
     }
 
     int status;
-    status = z_run_async("cc", src_pathname, "-o", executable_pathname);
+    status = z_run_async("cc", src_pathname, "-o", argv[0]);
 
     if (status != 0) {
         exit(status);
     }
 
-	status = execl(executable_pathname, executable_pathname, NULL);
+	status = execvp(argv[0], argv);
     exit(1);
 }
 

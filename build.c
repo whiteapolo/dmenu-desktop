@@ -2,7 +2,7 @@
 #define LIBZATAR_IMPLEMENTATION
 #include "libzatar.h"
 
-#define TARGET "dmenu-desktop-z"
+#define TARGET "dmenu-desktop"
 #define INSTALL_PATH "/usr/bin"
 
 int build()
@@ -13,17 +13,6 @@ int build()
     z_cmd_append(&cmd, "-Wextra", "-Wall", "-pedantic");
 
     return z_cmd_run_async(&cmd);
-}
-
-int clean()
-{
-    int status = remove(TARGET);
-
-    if (status == 0) {
-        z_print_info("removed '%s'", TARGET);
-    }
-
-    return status;
 }
 
 int install()
@@ -47,7 +36,7 @@ int uninstall()
 
 int main(int argc, char **argv)
 {
-    z_rebuild_yourself(__FILE__, "./build");
+    z_rebuild_yourself(__FILE__, argv);
 
     if (argc == 1) {
         return build();
@@ -56,15 +45,14 @@ int main(int argc, char **argv)
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "build") == 0) {
             build();
-        } else if (strcmp(argv[i], "clean") == 0) {
-            clean();
         } else if (strcmp(argv[i], "install") == 0) {
             install();
         } else if (strcmp(argv[i], "uninstall") == 0) {
             uninstall();
         } else {
             z_print_error("unrecognized option '%s'", argv[i]);
-            z_print_error("possible options are: 'build', 'clean', 'install', 'uninstall'");
+            z_print_error("possible options are: 'build', 'install', 'uninstall'");
+            return -1;
         }
     }
 
