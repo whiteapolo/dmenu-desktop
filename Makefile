@@ -10,8 +10,7 @@ all: $(TARGET)
 
 # Compile the program with multiple source files
 $(TARGET): $(SRC)
-	make -C libzatar
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) libzatar/lib/libzatar.a
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
 
 # Clean rule to remove the executable and object files
 clean:

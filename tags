@@ -1,0 +1,609 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/white/projects/dmenu-desktop/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	//
+$(LIB)	libzatar/Makefile	/^$(LIB): $(OBJ) | $(LIB_DIR)$/;"	t
+$(LIB_DIR)	libzatar/Makefile	/^$(LIB_DIR):$/;"	t
+$(TARGET)	Makefile	/^$(TARGET): $(SRC)$/;"	t
+ADDRESS	libzatar/include/shared.h	/^#define ADDRESS(/;"	d
+ARROW_DOWN	libzatar/include/cursor.h	/^	ARROW_DOWN = 1003,$/;"	e	enum:__anon5e4e24540103
+ARROW_LEFT	libzatar/include/cursor.h	/^	ARROW_LEFT = 1000,$/;"	e	enum:__anon5e4e24540103
+ARROW_RIGHT	libzatar/include/cursor.h	/^	ARROW_RIGHT = 1001,$/;"	e	enum:__anon5e4e24540103
+ARROW_UP	libzatar/include/cursor.h	/^	ARROW_UP = 1002,$/;"	e	enum:__anon5e4e24540103
+AVL_TREE_H	libzatar/include/avlTree.h	/^#define AVL_TREE_H$/;"	d
+B1	libzatar/include/cursor.h	/^#define B1 /;"	d
+B2	libzatar/include/cursor.h	/^#define B2 /;"	d
+B3	libzatar/include/cursor.h	/^#define B3 /;"	d
+B4	libzatar/include/cursor.h	/^#define B4 /;"	d
+B5	libzatar/include/cursor.h	/^#define B5 /;"	d
+B6	libzatar/include/cursor.h	/^#define B6 /;"	d
+B7	libzatar/include/cursor.h	/^#define B7 /;"	d
+B8	libzatar/include/cursor.h	/^#define B8 /;"	d
+BEAM_BLINKING	libzatar/include/cursor.h	/^	BEAM_BLINKING = 5,$/;"	e	enum:__anon5e4e24540203
+BEAM_STEADY	libzatar/include/cursor.h	/^	BEAM_STEADY = 6,$/;"	e	enum:__anon5e4e24540203
+BLOCK_BLINKING	libzatar/include/cursor.h	/^	BLOCK_BLINKING = 1,$/;"	e	enum:__anon5e4e24540203
+BLOCK_STEADY	libzatar/include/cursor.h	/^	BLOCK_STEADY = 0,$/;"	e	enum:__anon5e4e24540203
+C0	libzatar/include/cursor.h	/^#define C0 /;"	d
+C1	libzatar/include/cursor.h	/^#define C1 /;"	d
+C2	libzatar/include/cursor.h	/^#define C2 /;"	d
+C3	libzatar/include/cursor.h	/^#define C3 /;"	d
+C4	libzatar/include/cursor.h	/^#define C4 /;"	d
+C5	libzatar/include/cursor.h	/^#define C5 /;"	d
+C6	libzatar/include/cursor.h	/^#define C6 /;"	d
+C7	libzatar/include/cursor.h	/^#define C7 /;"	d
+C8	libzatar/include/cursor.h	/^#define C8 /;"	d
+CALL_F_IF_NOT_NULL	libzatar.h	/^#define CALL_F_IF_NOT_NULL(/;"	d
+CC	Makefile	/^CC = cc$/;"	m
+CC	libzatar/Makefile	/^CC = cc$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -Wall -Wextra -O0 -g$/;"	m
+CFLAGS	libzatar/Makefile	/^CFLAGS = -pedantic -Wall -Wextra -Iinclude -g$/;"	m
+CHAR2_TO_INT	libzatar.h	/^#define CHAR2_TO_INT(/;"	d
+CTRL_KEY	libzatar.h	/^#define CTRL_KEY(/;"	d
+CTRL_KEY	libzatar/include/cursor.h	/^#define CTRL_KEY(/;"	d
+CURSOR_H	libzatar/include/cursor.h	/^#define CURSOR_H$/;"	d
+CURSOR_STYLE	libzatar/include/cursor.h	/^} CURSOR_STYLE;$/;"	t	typeref:enum:__anon5e4e24540203
+DELETE	libzatar/include/cursor.h	/^	DELETE = 1004,$/;"	e	enum:__anon5e4e24540103
+DUP	libzatar/include/shared.h	/^#define DUP(/;"	d
+DesktopFile	main.c	/^} DesktopFile;$/;"	t	typeref:struct:__anon0d38083b0108	file:
+EMPTY_KEY	libzatar/include/cursor.h	/^    EMPTY_KEY = 999,$/;"	e	enum:__anon5e4e24540103
+EMPTY_STR	libzatar/include/str.h	/^#define EMPTY_STR /;"	d
+END	libzatar/include/cursor.h	/^	END = 1006,$/;"	e	enum:__anon5e4e24540103
+EXPECT	libzatar/tests/test.h	/^#define EXPECT(/;"	d
+Err	libzatar/include/shared.h	/^typedef enum { Ok = 0, Err = -1, } Result;$/;"	e	enum:__anon11f6da0d0103
+GRAPH_H	libzatar/include/graph.h	/^#define GRAPH_H$/;"	d
+GREEN	libzatar/tests/test.h	/^const char *GREEN = "\\033[1;32m";$/;"	v	typeref:typename:const char *
+HOME	libzatar/include/cursor.h	/^	HOME = 1005,$/;"	e	enum:__anon5e4e24540103
+LIB	libzatar/Makefile	/^LIB = $(LIB_DIR)\/libzatar.a$/;"	m
+LIBZATAR_H	libzatar.h	/^#define LIBZATAR_H$/;"	d
+LIBZATAR_IMPLEMENTATION	main.c	/^#define LIBZATAR_IMPLEMENTATION$/;"	d	file:
+LIB_DIR	libzatar/Makefile	/^LIB_DIR = lib$/;"	m
+LLL_H	libzatar/include/list.h	/^#define LLL_H$/;"	d
+MAP_H	libzatar/include/map.h	/^#define MAP_H$/;"	d
+MIN_PRIORITY_QUEUE_CAPACITY	libzatar/include/priorityQueue.h	/^#define MIN_PRIORITY_QUEUE_CAPACITY /;"	d
+MIN_STACK_CAPACITY	libzatar/include/stack.h	/^#define MIN_STACK_CAPACITY /;"	d
+MIN_STR_CAPACITY	libzatar/include/str.h	/^#define MIN_STR_CAPACITY /;"	d
+OBJ	libzatar/Makefile	/^OBJ = $(patsubst src\/%.c,obj\/%.o,$(SRC))$/;"	m
+Ok	libzatar/include/shared.h	/^typedef enum { Ok = 0, Err = -1, } Result;$/;"	e	enum:__anon11f6da0d0103
+PAGE_DOWN	libzatar/include/cursor.h	/^	PAGE_DOWN = 1008,$/;"	e	enum:__anon5e4e24540103
+PAGE_UP	libzatar/include/cursor.h	/^	PAGE_UP = 1007,$/;"	e	enum:__anon5e4e24540103
+PATH_H	libzatar/include/path.h	/^#define PATH_H$/;"	d
+PATH_MAX	libzatar.h	/^#define PATH_MAX /;"	d
+PREFIX	Makefile	/^PREFIX = ~\/.local\/bin$/;"	m
+PRIORITYQUEUE_H	libzatar/include/priorityQueue.h	/^#define PRIORITYQUEUE_H$/;"	d
+PipeMode	libzatar/include/path.h	/^typedef enum { Read = 0, Write = 1, } PipeMode;$/;"	t	typeref:enum:__anon4c7c8e230103
+QUEUE_H	libzatar/include/queue.h	/^#define QUEUE_H$/;"	d
+RED	libzatar/tests/test.h	/^const char *RED   = "\\033[1;31m";$/;"	v	typeref:typename:const char *
+RESET	libzatar/tests/test.h	/^const char *RESET = "\\033[0m";$/;"	v	typeref:typename:const char *
+RUN_TEST	libzatar/tests/test.h	/^#define RUN_TEST(/;"	d
+Read	libzatar/include/path.h	/^typedef enum { Read = 0, Write = 1, } PipeMode;$/;"	e	enum:__anon4c7c8e230103
+Result	libzatar/include/shared.h	/^typedef enum { Ok = 0, Err = -1, } Result;$/;"	t	typeref:enum:__anon11f6da0d0103
+SEQUENCE	libzatar/src/cursor.c	/^#define SEQUENCE(/;"	d	file:
+SHARED_H	libzatar/include/shared.h	/^#define SHARED_H$/;"	d
+SIZED_PRIORITY_QUEUE_H	libzatar/include/sizedPriorityQueue.h	/^#define SIZED_PRIORITY_QUEUE_H$/;"	d
+SRC	Makefile	/^SRC = main.c$/;"	m
+SRC	libzatar/Makefile	/^SRC = $(wildcard src\/*.c)$/;"	m
+STACK_H	libzatar/include/stack.h	/^#define STACK_H$/;"	d
+STR_H	libzatar/include/str.h	/^#define STR_H$/;"	d
+Scanner	libzatar/include/str.h	/^} Scanner;$/;"	t	typeref:struct:__anon8e34e74f0208
+TARGET	Makefile	/^TARGET = dmenu-desktop$/;"	m
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(newPriorityQueueTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(newPriorityQueueWithCapacityTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(priorityQueueClearTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(priorityQueueGetSizeTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(priorityQueueIsEmptyTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(priorityQueuePeekTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(priorityQueuePopTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(priorityQueuePushTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(priorityQueueShrinkToFitTest)$/;"	f
+TEST	libzatar/tests/priorityQueueTest.h	/^TEST(priorityQueueTest)$/;"	f
+TEST	libzatar/tests/queueTest.h	/^TEST(newQueueTest)$/;"	f
+TEST	libzatar/tests/queueTest.h	/^TEST(queueGetSizeTest)$/;"	f
+TEST	libzatar/tests/queueTest.h	/^TEST(queueIsEmptyTest)$/;"	f
+TEST	libzatar/tests/queueTest.h	/^TEST(queuePeekTest)$/;"	f
+TEST	libzatar/tests/queueTest.h	/^TEST(queuePopTest)$/;"	f
+TEST	libzatar/tests/queueTest.h	/^TEST(queuePushTest)$/;"	f
+TEST	libzatar/tests/queueTest.h	/^TEST(queueTest)$/;"	f
+TEST	libzatar/tests/sizedPriorityQueueTest.h	/^TEST(newSizedPriorityQueueTest)$/;"	f
+TEST	libzatar/tests/sizedPriorityQueueTest.h	/^TEST(sizedPriorityQueueGetSizeTest)$/;"	f
+TEST	libzatar/tests/sizedPriorityQueueTest.h	/^TEST(sizedPriorityQueueIsEmptyTest)$/;"	f
+TEST	libzatar/tests/sizedPriorityQueueTest.h	/^TEST(sizedPriorityQueuePeekTest)$/;"	f
+TEST	libzatar/tests/sizedPriorityQueueTest.h	/^TEST(sizedPriorityQueuePopTest)$/;"	f
+TEST	libzatar/tests/sizedPriorityQueueTest.h	/^TEST(sizedPriorityQueuePushTest)$/;"	f
+TEST	libzatar/tests/sizedPriorityQueueTest.h	/^TEST(sizedPriorityQueueTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(newStackTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(newStackWithCapacityTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(stackClearTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(stackGetSizeTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(stackIsEmptyTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(stackPopTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(stackPushTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(stackShrinkToFitTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(stackTest)$/;"	f
+TEST	libzatar/tests/stackTest.h	/^TEST(stackTopTest)$/;"	f
+TEST	libzatar/tests/test.h	/^#define TEST(/;"	d
+TEST_H	libzatar/tests/test.h	/^#define TEST_H$/;"	d
+UNDERLINE_BLINKING	libzatar/include/cursor.h	/^	UNDERLINE_BLINKING = 3,$/;"	e	enum:__anon5e4e24540203
+UNDERLINE_STEADY	libzatar/include/cursor.h	/^	UNDERLINE_STEADY = 4,$/;"	e	enum:__anon5e4e24540203
+Vertex	libzatar/include/graph.h	/^} Vertex;$/;"	t	typeref:struct:__anon4d9763880108
+Write	libzatar/include/path.h	/^typedef enum { Read = 0, Write = 1, } PipeMode;$/;"	e	enum:__anon4c7c8e230103
+Z_AVL_DECLARE	libzatar.h	/^#define Z_AVL_DECLARE(/;"	d
+Z_AVL_IMPLEMENT	libzatar.h	/^#define Z_AVL_IMPLEMENT(/;"	d
+Z_COLOR_BLUE	libzatar.h	/^#define Z_COLOR_BLUE /;"	d
+Z_COLOR_BOLD_BLUE	libzatar.h	/^#define Z_COLOR_BOLD_BLUE /;"	d
+Z_COLOR_BOLD_CYAN	libzatar.h	/^#define Z_COLOR_BOLD_CYAN /;"	d
+Z_COLOR_BOLD_GRAY	libzatar.h	/^#define Z_COLOR_BOLD_GRAY /;"	d
+Z_COLOR_BOLD_GREEN	libzatar.h	/^#define Z_COLOR_BOLD_GREEN /;"	d
+Z_COLOR_BOLD_MAGENTA	libzatar.h	/^#define Z_COLOR_BOLD_MAGENTA /;"	d
+Z_COLOR_BOLD_RED	libzatar.h	/^#define Z_COLOR_BOLD_RED /;"	d
+Z_COLOR_BOLD_WHITE	libzatar.h	/^#define Z_COLOR_BOLD_WHITE /;"	d
+Z_COLOR_BOLD_YELLOW	libzatar.h	/^#define Z_COLOR_BOLD_YELLOW /;"	d
+Z_COLOR_CYAN	libzatar.h	/^#define Z_COLOR_CYAN /;"	d
+Z_COLOR_GRAY	libzatar.h	/^#define Z_COLOR_GRAY /;"	d
+Z_COLOR_GREEN	libzatar.h	/^#define Z_COLOR_GREEN /;"	d
+Z_COLOR_MAGENTA	libzatar.h	/^#define Z_COLOR_MAGENTA /;"	d
+Z_COLOR_RED	libzatar.h	/^#define Z_COLOR_RED /;"	d
+Z_COLOR_RESET	libzatar.h	/^#define Z_COLOR_RESET /;"	d
+Z_COLOR_WHITE	libzatar.h	/^#define Z_COLOR_WHITE /;"	d
+Z_COLOR_YELLOW	libzatar.h	/^#define Z_COLOR_YELLOW /;"	d
+Z_CURSOR_STYLE	libzatar.h	/^} Z_CURSOR_STYLE;$/;"	t	typeref:enum:__anonbc5080340203
+Z_CURSOR_STYLE_BEAM_BLINKING	libzatar.h	/^    Z_CURSOR_STYLE_BEAM_BLINKING      = 5,$/;"	e	enum:__anonbc5080340203
+Z_CURSOR_STYLE_BEAM_STEADY	libzatar.h	/^    Z_CURSOR_STYLE_BEAM_STEADY        = 6,$/;"	e	enum:__anonbc5080340203
+Z_CURSOR_STYLE_BLOCK_BLINKING	libzatar.h	/^    Z_CURSOR_STYLE_BLOCK_BLINKING     = 1,$/;"	e	enum:__anonbc5080340203
+Z_CURSOR_STYLE_BLOCK_STEADY	libzatar.h	/^    Z_CURSOR_STYLE_BLOCK_STEADY       = 0,$/;"	e	enum:__anonbc5080340203
+Z_CURSOR_STYLE_UNDERLINE_BLINKING	libzatar.h	/^    Z_CURSOR_STYLE_UNDERLINE_BLINKING = 3,$/;"	e	enum:__anonbc5080340203
+Z_CURSOR_STYLE_UNDERLINE_STEADY	libzatar.h	/^    Z_CURSOR_STYLE_UNDERLINE_STEADY   = 4,$/;"	e	enum:__anonbc5080340203
+Z_Cmd	libzatar.h	/^} Z_Cmd;$/;"	t	typeref:struct:__anonbc5080340508
+Z_DEFAULT_GROWTH_RATE	libzatar.h	/^#define Z_DEFAULT_GROWTH_RATE /;"	d
+Z_Err	libzatar.h	/^typedef enum { Z_Ok, Z_Err } Z_Result;$/;"	e	enum:__anonbc5080340103
+Z_KEY_ARROW_DOWN	libzatar.h	/^#define Z_KEY_ARROW_DOWN /;"	d
+Z_KEY_ARROW_LEFT	libzatar.h	/^#define Z_KEY_ARROW_LEFT /;"	d
+Z_KEY_ARROW_RIGHT	libzatar.h	/^#define Z_KEY_ARROW_RIGHT /;"	d
+Z_KEY_ARROW_UP	libzatar.h	/^#define Z_KEY_ARROW_UP /;"	d
+Z_KEY_DELETE	libzatar.h	/^#define Z_KEY_DELETE /;"	d
+Z_KEY_EMPTY	libzatar.h	/^#define Z_KEY_EMPTY /;"	d
+Z_KEY_END	libzatar.h	/^#define Z_KEY_END /;"	d
+Z_KEY_HOME	libzatar.h	/^#define Z_KEY_HOME /;"	d
+Z_KEY_PAGE_DOWN	libzatar.h	/^#define Z_KEY_PAGE_DOWN /;"	d
+Z_KEY_PAGE_UP	libzatar.h	/^#define Z_KEY_PAGE_UP /;"	d
+Z_MAP_DECLARE	libzatar.h	/^#define Z_MAP_DECLARE(/;"	d
+Z_MAP_IMPLEMENT	libzatar.h	/^#define Z_MAP_IMPLEMENT(/;"	d
+Z_MAT_AT	libzatar.h	/^#define Z_MAT_AT(/;"	d
+Z_MAT_DECLARE	libzatar.h	/^#define Z_MAT_DECLARE(/;"	d
+Z_MAT_FREE	libzatar.h	/^#define Z_MAT_FREE(/;"	d
+Z_MAT_INIT	libzatar.h	/^#define Z_MAT_INIT(/;"	d
+Z_Ok	libzatar.h	/^typedef enum { Z_Ok, Z_Err } Z_Result;$/;"	e	enum:__anonbc5080340103
+Z_Pipe_Mode	libzatar.h	/^} Z_Pipe_Mode;$/;"	t	typeref:enum:__anonbc5080340303
+Z_Pipe_Mode_Read	libzatar.h	/^    Z_Pipe_Mode_Read = 0,$/;"	e	enum:__anonbc5080340303
+Z_Pipe_Mode_Write	libzatar.h	/^    Z_Pipe_Mode_Write = 1,$/;"	e	enum:__anonbc5080340303
+Z_Result	libzatar.h	/^typedef enum { Z_Ok, Z_Err } Z_Result;$/;"	t	typeref:enum:__anonbc5080340103
+Z_Str	libzatar.h	/^} Z_Str;$/;"	t	typeref:struct:__anonbc5080340408
+Z_Str_Slice	libzatar.h	/^typedef Z_Str Z_Str_Slice;$/;"	t	typeref:typename:Z_Str
+Z_VECTOR_DECLARE	libzatar.h	/^#define Z_VECTOR_DECLARE(/;"	d
+Z_VECTOR_IMPLEMENT	libzatar.h	/^#define Z_VECTOR_IMPLEMENT(/;"	d
+__anon0d38083b0108	main.c	/^typedef struct {$/;"	s	file:
+__anon11f6da0d0103	libzatar/include/shared.h	/^typedef enum { Ok = 0, Err = -1, } Result;$/;"	g
+__anon4c7c8e230103	libzatar/include/path.h	/^typedef enum { Read = 0, Write = 1, } PipeMode;$/;"	g
+__anon4d9763880108	libzatar/include/graph.h	/^typedef struct {$/;"	s
+__anon4d9763880208	libzatar/include/graph.h	/^typedef struct {$/;"	s
+__anon56a8501b0108	libzatar/include/queue.h	/^typedef struct {$/;"	s
+__anon5e4e24540103	libzatar/include/cursor.h	/^enum {$/;"	g
+__anon5e4e24540203	libzatar/include/cursor.h	/^typedef enum {$/;"	g
+__anon8dbde0940108	libzatar/include/map.h	/^typedef struct {$/;"	s
+__anon8e34e74f0108	libzatar/include/str.h	/^typedef struct {$/;"	s
+__anon8e34e74f0208	libzatar/include/str.h	/^typedef struct {$/;"	s
+__anon8f9c157c0108	libzatar/include/sizedPriorityQueue.h	/^typedef struct {$/;"	s
+__anonb66df95d0108	libzatar/include/priorityQueue.h	/^typedef struct {$/;"	s
+__anonbc5080340103	libzatar.h	/^typedef enum { Z_Ok, Z_Err } Z_Result;$/;"	g
+__anonbc5080340203	libzatar.h	/^typedef enum {$/;"	g
+__anonbc5080340303	libzatar.h	/^typedef enum {$/;"	g
+__anonbc5080340408	libzatar.h	/^typedef struct {$/;"	s
+__anonbc5080340508	libzatar.h	/^typedef struct {$/;"	s
+__anonedf579ac0108	libzatar/include/stack.h	/^typedef struct {$/;"	s
+_z_cmd_append	libzatar.h	/^void _z_cmd_append(Z_Cmd *cmd, ...)$/;"	f	typeref:typename:void
+_z_run_async	libzatar.h	/^int _z_run_async(const char *arg, ...)$/;"	f	typeref:typename:int
+_z_should_rebuild	libzatar.h	/^bool _z_should_rebuild(const char *target, ...)$/;"	f	typeref:typename:bool
+all	Makefile	/^all: $(TARGET)$/;"	t
+all	libzatar/Makefile	/^all: $(LIB)$/;"	t
+avlFind	libzatar/src/avlTree.c	/^void *avlFind(const avlNode *root, const void *key, int (*cmpKeys)(const void *,const void *))$/;"	f	typeref:typename:void *
+avlFindNode	libzatar/src/avlTree.c	/^const avlNode *avlFindNode(const avlNode *root, const void *key, int (*cmpKeys)(const void *,con/;"	f	typeref:typename:const avlNode *
+avlFree	libzatar/src/avlTree.c	/^void avlFree(avlNode *root, void (*freeKey)(void *), void (*freeData)(void *))$/;"	f	typeref:typename:void
+avlGetMax	libzatar/src/avlTree.c	/^avlNode *avlGetMax(avlNode *root)$/;"	f	typeref:typename:avlNode *
+avlGetMin	libzatar/src/avlTree.c	/^avlNode *avlGetMin(avlNode *root)$/;"	f	typeref:typename:avlNode *
+avlInsert	libzatar/src/avlTree.c	/^void avlInsert(avlNode **root, void *key, void *data, int (*cmpKeys)(const void *,const void *))$/;"	f	typeref:typename:void
+avlIsExists	libzatar/src/avlTree.c	/^bool avlIsExists(const avlNode *root, const void *key, int (*cmpKeys)(const void *,const void *)/;"	f	typeref:typename:bool
+avlNode	libzatar/include/avlTree.h	/^typedef struct avlNode {$/;"	s
+avlNode	libzatar/include/avlTree.h	/^} avlNode;$/;"	t	typeref:struct:avlNode
+avlOrderTraverse	libzatar/src/avlTree.c	/^void avlOrderTraverse(const avlNode *root, void (*action)(const void *key, const void *data, voi/;"	f	typeref:typename:void
+avlPrint	libzatar/src/avlTree.c	/^void avlPrint(const avlNode *root, void (*print)(const void *key, const void *data, void *arg), /;"	f	typeref:typename:void
+avlRemove	libzatar/src/avlTree.c	/^void avlRemove(avlNode **root, const void *key, int (*cmpKeys)(const void *,const void *), void /;"	f	typeref:typename:void
+avlUpdate	libzatar/src/avlTree.c	/^void avlUpdate(avlNode *root, const void *key, int (*cmpKeys)(const void *,const void *), void (/;"	f	typeref:typename:void
+capacity	libzatar.h	/^    int capacity;$/;"	m	struct:__anonbc5080340408	typeref:typename:int
+capacity	libzatar.h	/^    int capacity;$/;"	m	struct:__anonbc5080340508	typeref:typename:int
+capacity	libzatar/include/priorityQueue.h	/^	size_t capacity;$/;"	m	struct:__anonb66df95d0108	typeref:typename:size_t
+capacity	libzatar/include/stack.h	/^	size_t capacity;$/;"	m	struct:__anonedf579ac0108	typeref:typename:size_t
+capacity	libzatar/include/str.h	/^	size_t capacity;$/;"	m	struct:__anon8e34e74f0108	typeref:typename:size_t
+charToInt	libzatar/src/str.c	/^int charToInt(const char c)$/;"	f	typeref:typename:int
+clean	Makefile	/^clean:$/;"	t
+clean	libzatar/Makefile	/^clean:$/;"	t
+clearLine	libzatar/src/cursor.c	/^void clearLine()$/;"	f	typeref:typename:void
+clearScreen	libzatar/src/cursor.c	/^void clearScreen()$/;"	f	typeref:typename:void
+cmp	libzatar/include/priorityQueue.h	/^	int (*cmp)(const void *, const void *);$/;"	m	struct:__anonb66df95d0108	typeref:typename:int (*)(const void *,const void *)
+cmp	libzatar/include/sizedPriorityQueue.h	/^	int (*cmp)(const void *, const void *);$/;"	m	struct:__anon8f9c157c0108	typeref:typename:int (*)(const void *,const void *)
+cmpKeys	libzatar/include/map.h	/^	int (*cmpKeys)(const void *, const void *);$/;"	m	struct:__anon8dbde0940108	typeref:typename:int (*)(const void *,const void *)
+cmpKeysType	libzatar/include/map.h	/^typedef int (*cmpKeysType)(const void *, const void *);$/;"	t	typeref:typename:int (*)(const void *,const void *)
+compressPath	libzatar/src/path.c	/^void compressPath(char *path)$/;"	f	typeref:typename:void
+currentSize	libzatar/include/sizedPriorityQueue.h	/^	size_t currentSize;$/;"	m	struct:__anon8f9c157c0108	typeref:typename:size_t
+cursorDown	libzatar/src/cursor.c	/^void cursorDown(int n)$/;"	f	typeref:typename:void
+cursorLeft	libzatar/src/cursor.c	/^void cursorLeft(int n)$/;"	f	typeref:typename:void
+cursorRight	libzatar/src/cursor.c	/^void cursorRight(int n)$/;"	f	typeref:typename:void
+cursorUp	libzatar/src/cursor.c	/^void cursorUp(int n)$/;"	f	typeref:typename:void
+data	libzatar/include/avlTree.h	/^	void *data;$/;"	m	struct:avlNode	typeref:typename:void *
+data	libzatar/include/graph.h	/^	char data;$/;"	m	struct:__anon4d9763880108	typeref:typename:char
+data	libzatar/include/list.h	/^	void *data;$/;"	m	struct:list	typeref:typename:void *
+data	libzatar/include/stack.h	/^	void **data;$/;"	m	struct:__anonedf579ac0108	typeref:typename:void **
+data	libzatar/include/str.h	/^	char *data;$/;"	m	struct:__anon8e34e74f0108	typeref:typename:char *
+die	main.c	/^void die(const char *s)$/;"	f	typeref:typename:void
+dirTraverse	libzatar/src/path.c	/^Result dirTraverse(const char *dir, bool (*action)(const char *))$/;"	f	typeref:typename:Result
+disableLineWrap	libzatar/src/cursor.c	/^void disableLineWrap()$/;"	f	typeref:typename:void
+disableRawMode	libzatar/src/cursor.c	/^Result disableRawMode()$/;"	f	typeref:typename:Result
+echoFileAppend	libzatar/src/path.c	/^Result echoFileAppend(const char *fileName, const char *fmt, ...)$/;"	f	typeref:typename:Result
+echoFileWrite	libzatar/src/path.c	/^Result echoFileWrite(const char *fileName, const char *fmt, ...)$/;"	f	typeref:typename:Result
+edges	libzatar/include/graph.h	/^	bool **edges;$/;"	m	struct:__anon4d9763880208	typeref:typename:bool **
+enableFullBuffering	libzatar/src/cursor.c	/^Result enableFullBuffering(FILE *fp)$/;"	f	typeref:typename:Result
+enableLineWrap	libzatar/src/cursor.c	/^void enableLineWrap()$/;"	f	typeref:typename:void
+enableRawMode	libzatar/src/cursor.c	/^Result enableRawMode(int vminKeys, int vtime)$/;"	f	typeref:typename:Result
+end	libzatar/include/queue.h	/^    list *end;$/;"	m	struct:__anon56a8501b0108	typeref:typename:list *
+enterAlternativeScreen	libzatar/src/cursor.c	/^void enterAlternativeScreen()$/;"	f	typeref:typename:void
+errMessage	libzatar/tests/test.h	/^const char *errMessage;$/;"	v	typeref:typename:const char *
+excuteProgram	main.c	/^void excuteProgram(const Map *programs, Z_Str_Slice *programName)$/;"	f	typeref:typename:void
+exec	main.c	/^	Z_Str exec;$/;"	m	struct:__anon0d38083b0108	typeref:typename:Z_Str	file:
+exitAlternativeScreen	libzatar/src/cursor.c	/^void exitAlternativeScreen()$/;"	f	typeref:typename:void
+expandPath	libzatar/src/path.c	/^void expandPath(char *path, const int maxLen)$/;"	f	typeref:typename:void
+fp	libzatar/include/str.h	/^	FILE *fp;$/;"	m	struct:__anon8e34e74f0208	typeref:typename:FILE *
+freeData	libzatar/include/sizedPriorityQueue.h	/^	void (*freeData)(void *);$/;"	m	struct:__anon8f9c157c0108	typeref:typename:void (*)(void *)
+getBalanceFactor	libzatar/src/avlTree.c	/^int getBalanceFactor(const avlNode *node)$/;"	f	typeref:typename:int
+getCursorPos	libzatar/src/cursor.c	/^Result getCursorPos(int *x, int *y)$/;"	f	typeref:typename:Result
+getEditDistance	libzatar/src/str.c	/^unsigned int getEditDistance(const strSlice s1, const strSlice s2)$/;"	f	typeref:typename:unsigned int
+getEditDistanceC	libzatar/src/str.c	/^unsigned int getEditDistanceC(const char *s1, const char *s2)$/;"	f	typeref:typename:unsigned int
+getFileSize	libzatar/src/shared.c	/^size_t getFileSize(FILE *fp)$/;"	f	typeref:typename:size_t
+getFmtSize	libzatar/src/shared.c	/^int getFmtSize(const char *fmt, ...)$/;"	f	typeref:typename:int
+getFmtSizeVa	libzatar/src/shared.c	/^int getFmtSizeVa(const char *fmt, va_list ap)$/;"	f	typeref:typename:int
+getFullFileName	libzatar/src/path.c	/^void getFullFileName(const char *dirName, const char *fileName, char *dest, int destLen)$/;"	f	typeref:typename:void
+getHeight	libzatar/src/avlTree.c	/^int getHeight(const avlNode *node)$/;"	f	typeref:typename:int
+getHomePath	libzatar/src/path.c	/^const char *getHomePath()$/;"	f	typeref:typename:const char *
+getPathExtention	libzatar/src/path.c	/^const char *getPathExtention(const char *path)$/;"	f	typeref:typename:const char *
+getScreenSize	libzatar/src/cursor.c	/^Result getScreenSize(int *width, int *height)$/;"	f	typeref:typename:Result
+getScreenSizeByCursor	libzatar/src/cursor.c	/^Result getScreenSizeByCursor(int *width, int *height)$/;"	f	typeref:typename:Result
+getScreenSizeByIoctl	libzatar/src/cursor.c	/^Result getScreenSizeByIoctl(int *width, int *height)$/;"	f	typeref:typename:Result
+graph	libzatar/include/graph.h	/^} graph;$/;"	t	typeref:struct:__anon4d9763880208
+graphAddDoubleEdge	libzatar/src/graph.c	/^void graphAddDoubleEdge(graph *g, int id1, int id2)$/;"	f	typeref:typename:void
+graphAddEdge	libzatar/src/graph.c	/^void graphAddEdge(graph *g, int id1, int id2)$/;"	f	typeref:typename:void
+graphAddVertex	libzatar/src/graph.c	/^int graphAddVertex(graph *g, char data)$/;"	f	typeref:typename:int
+graphForEveryAdjacent	libzatar/src/graph.c	/^void graphForEveryAdjacent(graph *g, int id, void (*action)(int))$/;"	f	typeref:typename:void
+graphFree	libzatar/src/graph.c	/^void graphFree(graph *g)$/;"	f	typeref:typename:void
+graphGetAdjacentN	libzatar/src/graph.c	/^int graphGetAdjacentN(const graph *g, int id, int n)$/;"	f	typeref:typename:int
+graphGetData	libzatar/src/graph.c	/^char graphGetData(const graph *g, int id)$/;"	f	typeref:typename:char
+graphInit	libzatar/src/graph.c	/^void graphInit(graph *g)$/;"	f	typeref:typename:void
+graphIsAdjacent	libzatar/src/graph.c	/^bool graphIsAdjacent(const graph *g, int id1, int id2)$/;"	f	typeref:typename:bool
+graphPrint	libzatar/src/graph.c	/^void graphPrint(const graph *g)$/;"	f	typeref:typename:void
+graphRemoveDoubleEdge	libzatar/src/graph.c	/^void graphRemoveDoubleEdge(graph *g, int id1, int id2)$/;"	f	typeref:typename:void
+graphRemoveEdge	libzatar/src/graph.c	/^void graphRemoveEdge(graph *g, int id1, int id2)$/;"	f	typeref:typename:void
+heap	libzatar/include/priorityQueue.h	/^} heap;$/;"	t	typeref:struct:__anonb66df95d0108
+heapClear	libzatar/src/priorityQueue.c	/^void heapClear(heap *h, void (*freeData)(void *))$/;"	f	typeref:typename:void
+heapFree	libzatar/src/priorityQueue.c	/^void heapFree(heap *h, void (*freeData)(void *))$/;"	f	typeref:typename:void
+heapGetSize	libzatar/src/priorityQueue.c	/^size_t heapGetSize(const heap *h)$/;"	f	typeref:typename:size_t
+heapIsEmpty	libzatar/src/priorityQueue.c	/^bool heapIsEmpty(const heap *h)$/;"	f	typeref:typename:bool
+heapPeek	libzatar/src/priorityQueue.c	/^const void *heapPeek(const heap *h)$/;"	f	typeref:typename:const void *
+heapPop	libzatar/src/priorityQueue.c	/^void *heapPop(heap *h)$/;"	f	typeref:typename:void *
+heapPush	libzatar/src/priorityQueue.c	/^void heapPush(heap *h, void *data)$/;"	f	typeref:typename:void
+heapShrinkToFit	libzatar/src/priorityQueue.c	/^void heapShrinkToFit(heap *h)$/;"	f	typeref:typename:void
+heapifyDown	libzatar/src/priorityQueue.c	/^void heapifyDown(heap *h, size_t i)$/;"	f	typeref:typename:void
+heapifyUp	libzatar/src/priorityQueue.c	/^void heapifyUp(heap *h, size_t i)$/;"	f	typeref:typename:void
+height	libzatar/include/avlTree.h	/^	int height;$/;"	m	struct:avlNode	typeref:typename:int
+hideCursor	libzatar/src/cursor.c	/^void hideCursor()$/;"	f	typeref:typename:void
+id	libzatar/include/graph.h	/^	int id;$/;"	m	struct:__anon4d9763880108	typeref:typename:int
+idCounter	libzatar/src/graph.c	/^static int idCounter = 0;$/;"	v	typeref:typename:int	file:
+install	Makefile	/^install: $(TARGET)$/;"	t
+isDir	libzatar/src/path.c	/^bool isDir(const char *path)$/;"	f	typeref:typename:bool
+isExtentionEqual	libzatar/src/path.c	/^bool isExtentionEqual(const char *path, const char *extention)$/;"	f	typeref:typename:bool
+isPathExists	libzatar/src/path.c	/^bool isPathExists(const char *path)$/;"	f	typeref:typename:bool
+isRegularFile	libzatar/src/path.c	/^bool isRegularFile(const char *path)$/;"	f	typeref:typename:bool
+key	libzatar/include/avlTree.h	/^	void *key;$/;"	m	struct:avlNode	typeref:typename:void *
+left	libzatar/include/avlTree.h	/^	struct avlNode *left;$/;"	m	struct:avlNode	typeref:struct:avlNode *
+left	libzatar/src/priorityQueue.c	/^size_t left(size_t i)$/;"	f	typeref:typename:size_t
+leftRightRotate	libzatar/src/avlTree.c	/^void leftRightRotate(avlNode **root)$/;"	f	typeref:typename:void
+leftRotate	libzatar/src/avlTree.c	/^void leftRotate(avlNode **root)$/;"	f	typeref:typename:void
+len	libzatar.h	/^	int len;$/;"	m	struct:__anonbc5080340508	typeref:typename:int
+len	libzatar.h	/^    int len;$/;"	m	struct:__anonbc5080340408	typeref:typename:int
+len	libzatar/include/stack.h	/^	size_t len;$/;"	m	struct:__anonedf579ac0108	typeref:typename:size_t
+len	libzatar/include/str.h	/^	size_t len;$/;"	m	struct:__anon8e34e74f0108	typeref:typename:size_t
+line	libzatar/include/str.h	/^	string line;$/;"	m	struct:__anon8e34e74f0208	typeref:typename:string
+list	libzatar/include/list.h	/^typedef struct list{$/;"	s
+list	libzatar/include/list.h	/^} list;$/;"	t	typeref:struct:list
+listFree	libzatar/src/list.c	/^void listFree(list **m, void (*freeData)(void *))$/;"	f	typeref:typename:void
+listGetLast	libzatar/src/list.c	/^const list *listGetLast(const list *l)$/;"	f	typeref:typename:const list *
+listInsertAfter	libzatar/src/list.c	/^void listInsertAfter(list *l, void *data)$/;"	f	typeref:typename:void
+listInsertEnd	libzatar/src/list.c	/^void listInsertEnd(list *l, void *data)$/;"	f	typeref:typename:void
+listPop	libzatar/src/list.c	/^void *listPop(list **m)$/;"	f	typeref:typename:void *
+listPrint	libzatar/src/list.c	/^void listPrint(const list *l, void (*printData)(void*))$/;"	f	typeref:typename:void
+listPush	libzatar/src/list.c	/^void listPush(list **m, void *data)$/;"	f	typeref:typename:void
+listRemoveAfter	libzatar/src/list.c	/^void *listRemoveAfter(list *l)$/;"	f	typeref:typename:void *
+listReverse	libzatar/src/list.c	/^void listReverse(list **lst)$/;"	f	typeref:typename:void
+main	libzatar/tests/main.c	/^int main()$/;"	f	typeref:typename:int
+main	main.c	/^int main(int, char **argv)$/;"	f	typeref:typename:int
+map	libzatar/include/map.h	/^} map;$/;"	t	typeref:struct:__anon8dbde0940108
+mapFind	libzatar/src/map.c	/^void *mapFind(const map *m, const void *key)$/;"	f	typeref:typename:void *
+mapFree	libzatar/src/map.c	/^void mapFree(map *m, void (*freeKey)(void *), void (*freeData)(void *))$/;"	f	typeref:typename:void
+mapInsert	libzatar/src/map.c	/^void mapInsert(map *m, void *key, void *data)$/;"	f	typeref:typename:void
+mapInsertAll	libzatar/src/map.c	/^void mapInsertAll(map *m, ...)$/;"	f	typeref:typename:void
+mapInsertAllVa	libzatar/src/map.c	/^void mapInsertAllVa(map *m, va_list ap)$/;"	f	typeref:typename:void
+mapIsEmpty	libzatar/src/map.c	/^bool mapIsEmpty(const map *m)$/;"	f	typeref:typename:bool
+mapIsExists	libzatar/src/map.c	/^bool mapIsExists(const map *m, const void *key)$/;"	f	typeref:typename:bool
+mapOrderTraverse	libzatar/src/map.c	/^void mapOrderTraverse(const map *m, void (*action)(const void *key, const void *data, void *arg)/;"	f	typeref:typename:void
+mapRemove	libzatar/src/map.c	/^void mapRemove(map *m, const void *key, void (*freeKey)(void *), void (*freeData)(void *))$/;"	f	typeref:typename:void
+mapUpdate	libzatar/src/map.c	/^void mapUpdate(map m, const void *key, void (*freeData)(void *), void *newData)$/;"	f	typeref:typename:void
+maxNode	libzatar/include/sizedPriorityQueue.h	/^	avlNode *maxNode;$/;"	m	struct:__anon8f9c157c0108	typeref:typename:avlNode *
+maxSize	libzatar/include/sizedPriorityQueue.h	/^	size_t maxSize;$/;"	m	struct:__anon8f9c157c0108	typeref:typename:size_t
+memdup	libzatar/src/shared.c	/^void *memdup(const void *mem, const size_t size)$/;"	f	typeref:typename:void *
+name	main.c	/^	Z_Str name;$/;"	m	struct:__anon0d38083b0108	typeref:typename:Z_Str	file:
+newAvlNode	libzatar/src/avlTree.c	/^avlNode *newAvlNode(void *key, void *data)$/;"	f	typeref:typename:avlNode *
+newHeap	libzatar/src/priorityQueue.c	/^heap newHeap(int (*cmp)(const void *, const void *), const size_t initializeCapacity)$/;"	f	typeref:typename:heap
+newList	libzatar/src/list.c	/^list *newList()$/;"	f	typeref:typename:list *
+newMap	libzatar/src/map.c	/^map newMap(int (*cmpKeys)(const void *, const void *))$/;"	f	typeref:typename:map
+newMapFrom	libzatar/src/map.c	/^map newMapFrom(int (*cmpKeys)(const void *, const void *), void *key, void *data, ...)$/;"	f	typeref:typename:map
+newPriorityQueue	libzatar/src/priorityQueue.c	/^priorityQueue newPriorityQueue(int (*cmp)(const void *, const void *))$/;"	f	typeref:typename:priorityQueue
+newPriorityQueueWithCapacity	libzatar/src/priorityQueue.c	/^priorityQueue newPriorityQueueWithCapacity(int (*cmp)(const void *, const void *), const size_t /;"	f	typeref:typename:priorityQueue
+newQueue	libzatar/src/queue.c	/^queue newQueue()$/;"	f	typeref:typename:queue
+newScanner	libzatar/src/str.c	/^Scanner newScanner(FILE *fp)$/;"	f	typeref:typename:Scanner
+newSizedPriorityQueue	libzatar/src/sizedPriorityQueue.c	/^sizedPriorityQueue newSizedPriorityQueue(const size_t maxSize,$/;"	f	typeref:typename:sizedPriorityQueue
+newStack	libzatar/src/stack.c	/^stack newStack()$/;"	f	typeref:typename:stack
+newStackWithCapacity	libzatar/src/stack.c	/^stack newStackWithCapacity(const size_t capacity)$/;"	f	typeref:typename:stack
+newStr	libzatar/src/str.c	/^string newStr(const char *fmt, ...)$/;"	f	typeref:typename:string
+newStrFromArray	libzatar/src/str.c	/^string newStrFromArray(char *s[], const size_t len, const char *delim)$/;"	f	typeref:typename:string
+newStrFromExisting	libzatar/src/str.c	/^string newStrFromExisting(const strSlice s)$/;"	f	typeref:typename:string
+newStrSlice	libzatar/src/str.c	/^string newStrSlice(const strSlice s, ssize_t start, ssize_t end, const ssize_t step)$/;"	f	typeref:typename:string
+newStrVa	libzatar/src/str.c	/^string newStrVa(const size_t minSize, const char *fmt, va_list ap)$/;"	f	typeref:typename:string
+newStrWithCapacity	libzatar/src/str.c	/^string newStrWithCapacity(const size_t initialCapacity, const char *fmt, ...)$/;"	f	typeref:typename:string
+next	libzatar/include/list.h	/^	struct list *next;$/;"	m	struct:list	typeref:struct:list *
+nextInDir	libzatar/src/path.c	/^Result nextInDir(DIR *dir, const char *dirName, char *destFileName, const int destLen)$/;"	f	typeref:typename:Result
+obj/%.o	libzatar/Makefile	/^obj\/%.o: src\/%.c | obj$/;"	t
+originalTermios	libzatar/src/cursor.c	/^static struct termios originalTermios;$/;"	v	typeref:struct:termios	file:
+original_termios	libzatar.h	/^static struct termios original_termios;$/;"	v	typeref:struct:termios
+parent	libzatar/src/priorityQueue.c	/^size_t parent(size_t i)$/;"	f	typeref:typename:size_t
+parseDesktopFile	main.c	/^Z_Result parseDesktopFile(const char *pathname, DesktopFile *desktopFile)$/;"	f	typeref:typename:Z_Result
+popen2	libzatar/src/path.c	/^Result popen2(char *path, char *argv[], FILE *ppipe[2])$/;"	f	typeref:typename:Result
+print	libzatar/tests/sizedPriorityQueueTest.h	/^void print(const void *key, const void *data, void *arg)$/;"	f	typeref:typename:void
+printCharNTimes	libzatar/src/avlTree.c	/^void printCharNTimes(const char c, const int n)$/;"	f	typeref:typename:void
+printProgramName	main.c	/^void printProgramName(Z_Str key, Z_Str  data, void *arg)$/;"	f	typeref:typename:void
+priorityQueue	libzatar/include/priorityQueue.h	/^typedef heap priorityQueue;$/;"	t	typeref:typename:heap
+priorityQueueClear	libzatar/src/priorityQueue.c	/^void priorityQueueClear(priorityQueue *q, void (*freeData)(void *))$/;"	f	typeref:typename:void
+priorityQueueFree	libzatar/src/priorityQueue.c	/^void priorityQueueFree(priorityQueue *q, void (*freeData)(void *))$/;"	f	typeref:typename:void
+priorityQueueGetSize	libzatar/src/priorityQueue.c	/^size_t priorityQueueGetSize(const priorityQueue *q)$/;"	f	typeref:typename:size_t
+priorityQueueIsEmpty	libzatar/src/priorityQueue.c	/^bool priorityQueueIsEmpty(const priorityQueue *q)$/;"	f	typeref:typename:bool
+priorityQueuePeek	libzatar/src/priorityQueue.c	/^const void *priorityQueuePeek(const priorityQueue *q)$/;"	f	typeref:typename:const void *
+priorityQueuePop	libzatar/src/priorityQueue.c	/^void *priorityQueuePop(priorityQueue *q)$/;"	f	typeref:typename:void *
+priorityQueuePush	libzatar/src/priorityQueue.c	/^void priorityQueuePush(priorityQueue *q, void *data)$/;"	f	typeref:typename:void
+priorityQueueShrinkToFit	libzatar/src/priorityQueue.c	/^void priorityQueueShrinkToFit(priorityQueue *q)$/;"	f	typeref:typename:void
+priorityQueueTestCmpInt	libzatar/tests/priorityQueueTest.h	/^int priorityQueueTestCmpInt(const void *a, const void *b)$/;"	f	typeref:typename:int
+proccessDesktopFile	main.c	/^void proccessDesktopFile(const char *pathname, Map *programs)$/;"	f	typeref:typename:void
+processDirectories	main.c	/^void processDirectories(Map *programs, const char *dirs[])$/;"	f	typeref:typename:void
+processDirectory	main.c	/^void processDirectory(const char *dirPath, Map *programs)$/;"	f	typeref:typename:void
+ptr	libzatar.h	/^	char **ptr;$/;"	m	struct:__anonbc5080340508	typeref:typename:char **
+ptr	libzatar.h	/^    char *ptr;$/;"	m	struct:__anonbc5080340408	typeref:typename:char *
+queue	libzatar/include/queue.h	/^} queue;$/;"	t	typeref:struct:__anon56a8501b0108
+queueClear	libzatar/src/queue.c	/^void queueClear(queue *q, void (*freeData)(void *))$/;"	f	typeref:typename:void
+queueFree	libzatar/src/queue.c	/^void queueFree(queue *q, void (*freeData)(void *))$/;"	f	typeref:typename:void
+queueGetSize	libzatar/src/queue.c	/^size_t queueGetSize(const queue *q)$/;"	f	typeref:typename:size_t
+queueIsEmpty	libzatar/src/queue.c	/^bool queueIsEmpty(const queue *q)$/;"	f	typeref:typename:bool
+queuePeek	libzatar/src/queue.c	/^void *queuePeek(queue *q)$/;"	f	typeref:typename:void *
+queuePop	libzatar/src/queue.c	/^void *queuePop(queue *q)$/;"	f	typeref:typename:void *
+queuePrint	libzatar/src/queue.c	/^void queuePrint(const queue *q, void (*printData)(void *))$/;"	f	typeref:typename:void
+queuePush	libzatar/src/queue.c	/^void queuePush(queue *q, void *data)$/;"	f	typeref:typename:void
+readEscapeKey	libzatar/src/cursor.c	/^int readEscapeKey()$/;"	f	typeref:typename:int
+readFile	libzatar/src/path.c	/^Result readFile(const char *fileName, const char *fmt, ...)$/;"	f	typeref:typename:Result
+readKey	libzatar/src/cursor.c	/^int readKey()$/;"	f	typeref:typename:int
+readWholeFile	libzatar/src/str.c	/^string readWholeFile(const char *fileName)$/;"	f	typeref:typename:string
+redirectFd	libzatar/src/path.c	/^Result redirectFd(int srcFd, const char *destFileName)$/;"	f	typeref:typename:Result
+registerChangeInWindowSize	libzatar/src/cursor.c	/^Result registerChangeInWindowSize(void (*funciton)(int))$/;"	f	typeref:typename:Result
+removeFieldCodes	main.c	/^void removeFieldCodes(Z_Str *s)$/;"	f	typeref:typename:void
+restoreCursorPos	libzatar/src/cursor.c	/^void restoreCursorPos()$/;"	f	typeref:typename:void
+right	libzatar/include/avlTree.h	/^	struct avlNode *right;$/;"	m	struct:avlNode	typeref:struct:avlNode *
+right	libzatar/src/priorityQueue.c	/^size_t right(size_t i)$/;"	f	typeref:typename:size_t
+rightLeftRotate	libzatar/src/avlTree.c	/^void rightLeftRotate(avlNode **root)$/;"	f	typeref:typename:void
+rightRotate	libzatar/src/avlTree.c	/^void rightRotate(avlNode **root)$/;"	f	typeref:typename:void
+root	libzatar/include/map.h	/^	avlNode *root;$/;"	m	struct:__anon8dbde0940108	typeref:typename:avlNode *
+root	libzatar/include/sizedPriorityQueue.h	/^	avlNode *root;$/;"	m	struct:__anon8f9c157c0108	typeref:typename:avlNode *
+saveCursorPos	libzatar/src/cursor.c	/^void saveCursorPos()$/;"	f	typeref:typename:void
+scannerFree	libzatar/src/str.c	/^void scannerFree(Scanner *scanner)$/;"	f	typeref:typename:void
+scannerNextLine	libzatar/src/str.c	/^const string *scannerNextLine(Scanner *scanner)$/;"	f	typeref:typename:const string *
+setCursorPos	libzatar/src/cursor.c	/^void setCursorPos(int x, int y)$/;"	f	typeref:typename:void
+setCursorStyle	libzatar/src/cursor.c	/^void setCursorStyle(CURSOR_STYLE style)$/;"	f	typeref:typename:void
+setCursorX	libzatar/src/cursor.c	/^void setCursorX(int x)$/;"	f	typeref:typename:void
+showCursor	libzatar/src/cursor.c	/^void showCursor()$/;"	f	typeref:typename:void
+size	libzatar/include/graph.h	/^	int size;$/;"	m	struct:__anon4d9763880208	typeref:typename:int
+size	libzatar/include/priorityQueue.h	/^	size_t size;$/;"	m	struct:__anonb66df95d0108	typeref:typename:size_t
+size	libzatar/include/queue.h	/^	size_t size;$/;"	m	struct:__anon56a8501b0108	typeref:typename:size_t
+sizedPriorityQueue	libzatar/include/sizedPriorityQueue.h	/^} sizedPriorityQueue;$/;"	t	typeref:struct:__anon8f9c157c0108
+sizedPriorityQueueClear	libzatar/src/sizedPriorityQueue.c	/^void sizedPriorityQueueClear(sizedPriorityQueue *q)$/;"	f	typeref:typename:void
+sizedPriorityQueueFree	libzatar/src/sizedPriorityQueue.c	/^void sizedPriorityQueueFree(sizedPriorityQueue *q)$/;"	f	typeref:typename:void
+sizedPriorityQueueGetSize	libzatar/src/sizedPriorityQueue.c	/^size_t sizedPriorityQueueGetSize(const sizedPriorityQueue *q)$/;"	f	typeref:typename:size_t
+sizedPriorityQueueIsEmpty	libzatar/src/sizedPriorityQueue.c	/^bool sizedPriorityQueueIsEmpty(const sizedPriorityQueue *q)$/;"	f	typeref:typename:bool
+sizedPriorityQueuePeek	libzatar/src/sizedPriorityQueue.c	/^const void *sizedPriorityQueuePeek(const sizedPriorityQueue *q)$/;"	f	typeref:typename:const void *
+sizedPriorityQueuePop	libzatar/src/sizedPriorityQueue.c	/^void *sizedPriorityQueuePop(sizedPriorityQueue *q)$/;"	f	typeref:typename:void *
+sizedPriorityQueuePush	libzatar/src/sizedPriorityQueue.c	/^void sizedPriorityQueuePush(sizedPriorityQueue *q, void *data)$/;"	f	typeref:typename:void
+sizedPriorityQueueTestCmpInt	libzatar/tests/sizedPriorityQueueTest.h	/^int sizedPriorityQueueTestCmpInt(const void *a, const void *b)$/;"	f	typeref:typename:int
+sliceStr	libzatar/src/str.c	/^strSlice sliceStr(const char *s, const size_t len)$/;"	f	typeref:typename:strSlice
+sliceStrC	libzatar/src/str.c	/^strSlice sliceStrC(const char *s)$/;"	f	typeref:typename:strSlice
+sliceStrRange	libzatar/src/str.c	/^strSlice sliceStrRange(const strSlice s, const size_t start, const size_t end)$/;"	f	typeref:typename:strSlice
+stack	libzatar/include/stack.h	/^} stack;$/;"	t	typeref:struct:__anonedf579ac0108
+stackClear	libzatar/src/stack.c	/^void stackClear(stack *s)$/;"	f	typeref:typename:void
+stackFree	libzatar/src/stack.c	/^void stackFree(stack *s, void (*freeData)(void *))$/;"	f	typeref:typename:void
+stackGetSize	libzatar/src/stack.c	/^size_t stackGetSize(const stack *s)$/;"	f	typeref:typename:size_t
+stackIsEmpty	libzatar/src/stack.c	/^bool stackIsEmpty(const stack *s)$/;"	f	typeref:typename:bool
+stackPop	libzatar/src/stack.c	/^void *stackPop(stack *s)$/;"	f	typeref:typename:void *
+stackPush	libzatar/src/stack.c	/^void stackPush(stack *s, void *data)$/;"	f	typeref:typename:void
+stackShrinkToFit	libzatar/src/stack.c	/^void stackShrinkToFit(stack *s)$/;"	f	typeref:typename:void
+stackTop	libzatar/src/stack.c	/^void *stackTop(const stack *s)$/;"	f	typeref:typename:void *
+start	libzatar/include/queue.h	/^    list *start;$/;"	m	struct:__anon56a8501b0108	typeref:typename:list *
+strChr	libzatar/src/str.c	/^ssize_t strChr(const strSlice haystack, const char needle, const size_t startOffset, size_t occu/;"	f	typeref:typename:ssize_t
+strClear	libzatar/src/str.c	/^void strClear(string *s)$/;"	f	typeref:typename:void
+strCmp	libzatar/src/str.c	/^int strCmp(const strSlice s1, const strSlice s2)$/;"	f	typeref:typename:int
+strCmpC	libzatar/src/str.c	/^int strCmpC(const strSlice s1, const char *s2)$/;"	f	typeref:typename:int
+strCountc	libzatar/src/str.c	/^size_t strCountc(const strSlice haystack, const char needle)$/;"	f	typeref:typename:size_t
+strCounts	libzatar/src/str.c	/^size_t strCounts(const strSlice haystack, const strSlice needle)$/;"	f	typeref:typename:size_t
+strCountsC	libzatar/src/str.c	/^size_t strCountsC(const strSlice haystack, const char *needle)$/;"	f	typeref:typename:size_t
+strCut	libzatar/src/str.c	/^void strCut(string *s, const size_t start, const size_t end)$/;"	f	typeref:typename:void
+strDebugPrint	libzatar/src/str.c	/^void strDebugPrint(const strSlice s)$/;"	f	typeref:typename:void
+strDisplayedLength	libzatar/src/str.c	/^size_t strDisplayedLength(const strSlice s)$/;"	f	typeref:typename:size_t
+strExtractBetween	libzatar/src/str.c	/^strSlice strExtractBetween(const strSlice s, const strSlice left, const strSlice right)$/;"	f	typeref:typename:strSlice
+strExtractBetweenC	libzatar/src/str.c	/^strSlice strExtractBetweenC(const strSlice s, const char *left, const char *right)$/;"	f	typeref:typename:strSlice
+strForEachTok	libzatar/src/str.c	/^void strForEachTok(const strSlice s, const char *delim, void (*action)(const strSlice))$/;"	f	typeref:typename:void
+strFree	libzatar/src/str.c	/^void strFree(string *s)$/;"	f	typeref:typename:void
+strGetLine	libzatar/src/str.c	/^string strGetLine(FILE *fp)$/;"	f	typeref:typename:string
+strInput	libzatar/src/str.c	/^string strInput(const char *prompt)$/;"	f	typeref:typename:string
+strIsEmpty	libzatar/src/str.c	/^bool strIsEmpty(const strSlice s)$/;"	f	typeref:typename:bool
+strIsEqual	libzatar/src/str.c	/^bool strIsEqual(const strSlice s1, const strSlice s2)$/;"	f	typeref:typename:bool
+strIsEqualC	libzatar/src/str.c	/^bool strIsEqualC(const strSlice s1, const char *s2)$/;"	f	typeref:typename:bool
+strIsNumeric	libzatar/src/str.c	/^bool strIsNumeric(const strSlice s)$/;"	f	typeref:typename:bool
+strPopc	libzatar/src/str.c	/^char strPopc(string *s)$/;"	f	typeref:typename:char
+strPrint	libzatar/src/str.c	/^void strPrint(const strSlice s)$/;"	f	typeref:typename:void
+strPrintln	libzatar/src/str.c	/^void strPrintln(const strSlice s)$/;"	f	typeref:typename:void
+strPush	libzatar/src/str.c	/^void strPush(string *s, const strSlice src)$/;"	f	typeref:typename:void
+strPushc	libzatar/src/str.c	/^void strPushc(string *s, const char c)$/;"	f	typeref:typename:void
+strPushcAt	libzatar/src/str.c	/^void strPushcAt(string *s, const size_t n, const char c)$/;"	f	typeref:typename:void
+strPushs	libzatar/src/str.c	/^void strPushs(string *s, const char *fmt, ...)$/;"	f	typeref:typename:void
+strPushsAt	libzatar/src/str.c	/^void strPushsAt(string *s, const size_t n, const char *fmt, ...)$/;"	f	typeref:typename:void
+strReplace	libzatar/src/str.c	/^void strReplace(string *s, const char *sub, const char *by, size_t maxOccurrences)$/;"	f	typeref:typename:void
+strReplaceAll	libzatar/src/str.c	/^void strReplaceAll(string *s, const char *sub, const char *by)$/;"	f	typeref:typename:void
+strReverse	libzatar/src/str.c	/^void strReverse(string *s)$/;"	f	typeref:typename:void
+strScanf	libzatar/src/str.c	/^int strScanf(const strSlice s, const char *fmt, ...)$/;"	f	typeref:typename:int
+strShrinkToFit	libzatar/src/str.c	/^void strShrinkToFit(string *s)$/;"	f	typeref:typename:void
+strSlice	libzatar/include/str.h	/^typedef string strSlice;$/;"	t	typeref:typename:string
+strStr	libzatar/src/str.c	/^ssize_t strStr(const strSlice haystack, const strSlice needle, const size_t startOffset)$/;"	f	typeref:typename:ssize_t
+strStrC	libzatar/src/str.c	/^ssize_t strStrC(const strSlice haystack, const char *needle, const size_t startOffset)$/;"	f	typeref:typename:ssize_t
+strToLower	libzatar/src/str.c	/^void strToLower(string *s)$/;"	f	typeref:typename:void
+strToNumeric	libzatar/src/str.c	/^long long strToNumeric(const strSlice s)$/;"	f	typeref:typename:long long
+strToUpper	libzatar/src/str.c	/^void strToUpper(string *s)$/;"	f	typeref:typename:void
+strTok	libzatar/src/str.c	/^strSlice strTok(const strSlice s, const strSlice prevSlice, const char *delim)$/;"	f	typeref:typename:strSlice
+strTokStart	libzatar/src/str.c	/^strSlice strTokStart(const strSlice s, const char *delim)$/;"	f	typeref:typename:strSlice
+strTopc	libzatar/src/str.c	/^char strTopc(const strSlice s)$/;"	f	typeref:typename:char
+strTrim	libzatar/src/str.c	/^void strTrim(string *s)$/;"	f	typeref:typename:void
+strTrimCset	libzatar/src/str.c	/^void strTrimCset(string *s, const char *cset)$/;"	f	typeref:typename:void
+string	libzatar/include/str.h	/^} string;$/;"	t	typeref:struct:__anon8e34e74f0108
+strnCmp	libzatar/src/str.c	/^int strnCmp(const strSlice s1, const strSlice s2, size_t n)$/;"	f	typeref:typename:int
+strnCmpC	libzatar/src/str.c	/^int strnCmpC(const strSlice s1, const char *s2, const size_t n)$/;"	f	typeref:typename:int
+strnIsEqual	libzatar/src/str.c	/^bool strnIsEqual(const strSlice s1, const strSlice s2, const size_t n)$/;"	f	typeref:typename:bool
+strnIsEqualC	libzatar/src/str.c	/^bool strnIsEqualC(const strSlice s1, const char *s2, const size_t n)$/;"	f	typeref:typename:bool
+strrChr	libzatar/src/str.c	/^ssize_t strrChr(const strSlice haystack, const char needle, const size_t startOffset, size_t occ/;"	f	typeref:typename:ssize_t
+swap	libzatar/src/shared.c	/^void swap(void *a, void *b, const size_t size)$/;"	f	typeref:typename:void
+test	libzatar/Makefile	/^test: $(LIB)$/;"	t
+testName	libzatar/tests/test.h	/^const char *testName;$/;"	v	typeref:typename:const char *
+traverseFile	libzatar/src/path.c	/^Result traverseFile(const char *fileName, const int bufSize, bool (*action)(char[bufSize]))$/;"	f	typeref:typename:Result
+uninstall	Makefile	/^uninstall:$/;"	t
+updateHeight	libzatar/src/avlTree.c	/^void updateHeight(avlNode *node)$/;"	f	typeref:typename:void
+updateScreen	libzatar/src/cursor.c	/^void updateScreen()$/;"	f	typeref:typename:void
+vec	libzatar/include/priorityQueue.h	/^	void **vec;$/;"	m	struct:__anonb66df95d0108	typeref:typename:void **
+vertecies	libzatar/include/graph.h	/^	Vertex *vertecies;$/;"	m	struct:__anon4d9763880208	typeref:typename:Vertex *
+waitForByte	libzatar/src/cursor.c	/^int waitForByte()$/;"	f	typeref:typename:int
+z_append_file	libzatar.h	/^Z_Result z_append_file(const char *fileName, const char *fmt, ...)$/;"	f	typeref:typename:Z_Result
+z_clear_line	libzatar.h	/^#define z_clear_line(/;"	d
+z_clear_screen	libzatar.h	/^#define z_clear_screen(/;"	d
+z_cmd_append	libzatar.h	/^#define z_cmd_append(/;"	d
+z_cmd_append_va	libzatar.h	/^void z_cmd_append_va(Z_Cmd *cmd, va_list ap)$/;"	f	typeref:typename:void
+z_cmd_clear	libzatar.h	/^void z_cmd_clear(Z_Cmd *cmd)$/;"	f	typeref:typename:void
+z_cmd_free	libzatar.h	/^void z_cmd_free(Z_Cmd *cmd)$/;"	f	typeref:typename:void
+z_cmd_init	libzatar.h	/^void z_cmd_init(Z_Cmd *cmd)$/;"	f	typeref:typename:void
+z_cmd_print	libzatar.h	/^void z_cmd_print(const Z_Cmd *cmd)$/;"	f	typeref:typename:void
+z_cmd_print_arg	libzatar.h	/^void z_cmd_print_arg(const char *arg)$/;"	f	typeref:typename:void
+z_cmd_run_async	libzatar.h	/^int z_cmd_run_async(Z_Cmd *cmd)$/;"	f	typeref:typename:int
+z_compress_path	libzatar.h	/^char *z_compress_path(const char *pathname)$/;"	f	typeref:typename:char *
+z_cursor_down	libzatar.h	/^#define z_cursor_down(/;"	d
+z_cursor_left	libzatar.h	/^#define z_cursor_left(/;"	d
+z_cursor_right	libzatar.h	/^#define z_cursor_right(/;"	d
+z_cursor_up	libzatar.h	/^#define z_cursor_up(/;"	d
+z_dir_traverse	libzatar.h	/^Z_Result z_dir_traverse(const char *dir, bool action(const char *))$/;"	f	typeref:typename:Z_Result
+z_disable_line_wrap	libzatar.h	/^#define z_disable_line_wrap(/;"	d
+z_disable_raw_mode	libzatar.h	/^Z_Result z_disable_raw_mode()$/;"	f	typeref:typename:Z_Result
+z_enable_full_buffering	libzatar.h	/^Z_Result z_enable_full_buffering(FILE *fp)$/;"	f	typeref:typename:Z_Result
+z_enable_raw_mode	libzatar.h	/^Z_Result z_enable_raw_mode(int vminKeys, int vtime)$/;"	f	typeref:typename:Z_Result
+z_enbale_line_wrap	libzatar.h	/^#define z_enbale_line_wrap(/;"	d
+z_ensure_capacity	libzatar.h	/^#define z_ensure_capacity(/;"	d
+z_enter_alternative_screen	libzatar.h	/^#define z_enter_alternative_screen(/;"	d
+z_exit_alternative_screen	libzatar.h	/^#define z_exit_alternative_screen(/;"	d
+z_expand_path	libzatar.h	/^char *z_expand_path(const char *pathname)$/;"	f	typeref:typename:char *
+z_get_cursor_pos	libzatar.h	/^Z_Result z_get_cursor_pos(int *x, int *y)$/;"	f	typeref:typename:Z_Result
+z_get_file_size	libzatar.h	/^int z_get_file_size(FILE *fp)$/;"	f	typeref:typename:int
+z_get_fmt_size	libzatar.h	/^int z_get_fmt_size(const char *fmt, ...)$/;"	f	typeref:typename:int
+z_get_fmt_size_va	libzatar.h	/^int z_get_fmt_size_va(const char *fmt, va_list ap)$/;"	f	typeref:typename:int
+z_get_home_path	libzatar.h	/^const char *z_get_home_path()$/;"	f	typeref:typename:const char *
+z_get_path_extention	libzatar.h	/^const char *z_get_path_extention(const char *pathname)$/;"	f	typeref:typename:const char *
+z_get_screen_size	libzatar.h	/^Z_Result z_get_screen_size(int *width, int *height)$/;"	f	typeref:typename:Z_Result
+z_get_screen_size_by_cursor	libzatar.h	/^Z_Result z_get_screen_size_by_cursor(int *width, int *height)$/;"	f	typeref:typename:Z_Result
+z_get_screen_size_by_ioctl	libzatar.h	/^Z_Result z_get_screen_size_by_ioctl(int *width, int *height)$/;"	f	typeref:typename:Z_Result
+z_hide_cursor	libzatar.h	/^#define z_hide_cursor(/;"	d
+z_is_dir	libzatar.h	/^bool z_is_dir(const char *pathname)$/;"	f	typeref:typename:bool
+z_is_extention_equal	libzatar.h	/^bool z_is_extention_equal(const char *pathname, const char *extention)$/;"	f	typeref:typename:bool
+z_is_path_exists	libzatar.h	/^bool z_is_path_exists(const char *pathname)$/;"	f	typeref:typename:bool
+z_is_regular_file	libzatar.h	/^bool z_is_regular_file(const char *pathname)$/;"	f	typeref:typename:bool
+z_max	libzatar.h	/^int z_max(int a, int b)$/;"	f	typeref:typename:int
+z_max3	libzatar.h	/^int z_max3(int a, int b, int c)$/;"	f	typeref:typename:int
+z_memdup	libzatar.h	/^void *z_memdup(const void *mem, const size_t size)$/;"	f	typeref:typename:void *
+z_min	libzatar.h	/^int z_min(int a, int b)$/;"	f	typeref:typename:int
+z_min3	libzatar.h	/^int z_min3(int a, int b, int c)$/;"	f	typeref:typename:int
+z_mkdir	libzatar.h	/^bool z_mkdir(const char *pathname)$/;"	f	typeref:typename:bool
+z_null_terminate	libzatar.h	/^#define z_null_terminate(/;"	d
+z_popen2	libzatar.h	/^Z_Result z_popen2(char *pathname, char *argv[], FILE *ppipe[2])$/;"	f	typeref:typename:Z_Result
+z_print_error	libzatar.h	/^#define z_print_error(/;"	d
+z_print_info	libzatar.h	/^#define z_print_info(/;"	d
+z_print_warning	libzatar.h	/^#define z_print_warning(/;"	d
+z_read_escape_key	libzatar.h	/^int z_read_escape_key()$/;"	f	typeref:typename:int
+z_read_file	libzatar.h	/^Z_Result z_read_file(const char *fileName, const char *fmt, ...)$/;"	f	typeref:typename:Z_Result
+z_read_key	libzatar.h	/^int z_read_key()$/;"	f	typeref:typename:int
+z_read_whole_file	libzatar.h	/^Z_Result z_read_whole_file(Z_Str *s, const char *pathname)$/;"	f	typeref:typename:Z_Result
+z_rebuild_yourself	libzatar.h	/^void z_rebuild_yourself(const char *src_pathname, const char *executable_pathname)$/;"	f	typeref:typename:void
+z_redirect_fd	libzatar.h	/^Z_Result z_redirect_fd(int srcFd, const char *destFileName)$/;"	f	typeref:typename:Z_Result
+z_register_change_in_window_size	libzatar.h	/^Z_Result z_register_change_in_window_size(void funciton(int))$/;"	f	typeref:typename:Z_Result
+z_restore_cursor_pos	libzatar.h	/^#define z_restore_cursor_pos(/;"	d
+z_run_async	libzatar.h	/^#define z_run_async(/;"	d
+z_save_cursor_pos	libzatar.h	/^#define z_save_cursor_pos(/;"	d
+z_set_cursor_pos	libzatar.h	/^#define z_set_cursor_pos(/;"	d
+z_set_cursor_style	libzatar.h	/^#define z_set_cursor_style(/;"	d
+z_set_cursor_x	libzatar.h	/^#define z_set_cursor_x(/;"	d
+z_should_rebuild	libzatar.h	/^#define z_should_rebuild(/;"	d
+z_should_rebuild_va	libzatar.h	/^bool z_should_rebuild_va(const char *target, va_list ap)$/;"	f	typeref:typename:bool
+z_show_cursor	libzatar.h	/^#define z_show_cursor(/;"	d
+z_str_clear	libzatar.h	/^void z_str_clear(Z_Str *s)$/;"	f	typeref:typename:void
+z_str_cmp	libzatar.h	/^int z_str_cmp(Z_Str_Slice s1, Z_Str_Slice s2)$/;"	f	typeref:typename:int
+z_str_free	libzatar.h	/^void z_str_free(Z_Str s)$/;"	f	typeref:typename:void
+z_str_free_ptr	libzatar.h	/^void z_str_free_ptr(Z_Str *s)$/;"	f	typeref:typename:void
+z_str_init	libzatar.h	/^void z_str_init(Z_Str *s, const char *fmt, ...)$/;"	f	typeref:typename:void
+z_str_init_va	libzatar.h	/^void z_str_init_va(Z_Str *s, const char *fmt, va_list ap)$/;"	f	typeref:typename:void
+z_str_is_empty	libzatar.h	/^bool z_str_is_empty(Z_Str_Slice s)$/;"	f	typeref:typename:bool
+z_str_len	libzatar.h	/^int z_str_len(Z_Str_Slice s)$/;"	f	typeref:typename:int
+z_str_n_cmp	libzatar.h	/^int z_str_n_cmp(Z_Str_Slice s1, Z_Str_Slice s2, int n)$/;"	f	typeref:typename:int
+z_str_new	libzatar.h	/^Z_Str z_str_new(const char *fmt, ...)$/;"	f	typeref:typename:Z_Str
+z_str_new_va	libzatar.h	/^Z_Str z_str_new_va(const char *fmt, va_list ap)$/;"	f	typeref:typename:Z_Str
+z_str_pop_c	libzatar.h	/^char z_str_pop_c(Z_Str *s)$/;"	f	typeref:typename:char
+z_str_print	libzatar.h	/^void z_str_print(Z_Str_Slice s)$/;"	f	typeref:typename:void
+z_str_println	libzatar.h	/^void z_str_println(Z_Str_Slice s)$/;"	f	typeref:typename:void
+z_str_push	libzatar.h	/^void z_str_push(Z_Str *s, const char *fmt, ...)$/;"	f	typeref:typename:void
+z_str_push_c	libzatar.h	/^void z_str_push_c(Z_Str *s, char c)$/;"	f	typeref:typename:void
+z_str_push_str	libzatar.h	/^void z_str_push_str(Z_Str *dst, const Z_Str_Slice src)$/;"	f	typeref:typename:void
+z_str_push_va	libzatar.h	/^void z_str_push_va(Z_Str *s, const char *fmt, va_list ap)$/;"	f	typeref:typename:void
+z_str_tok_init	libzatar.h	/^Z_Str_Slice z_str_tok_init(Z_Str_Slice s)$/;"	f	typeref:typename:Z_Str_Slice
+z_str_tok_next	libzatar.h	/^Z_Result z_str_tok_next(Z_Str_Slice s, Z_Str_Slice *slice, const char *delim)$/;"	f	typeref:typename:Z_Result
+z_str_top_c	libzatar.h	/^char z_str_top_c(Z_Str *s)$/;"	f	typeref:typename:char
+z_swap	libzatar.h	/^void z_swap(void *a, void *b, const size_t size)$/;"	f	typeref:typename:void
+z_wait_for_byte	libzatar.h	/^int z_wait_for_byte()$/;"	f	typeref:typename:int
+z_write_file	libzatar.h	/^Z_Result z_write_file(const char *fileName, const char *fmt, ...)$/;"	f	typeref:typename:Z_Result
+zatarMax	libzatar/src/shared.c	/^int zatarMax(const int a, const int b)$/;"	f	typeref:typename:int
+zatarMax3	libzatar/src/shared.c	/^int zatarMax3(const int a, const int b, const int c)$/;"	f	typeref:typename:int
+zatarMin	libzatar/src/shared.c	/^int zatarMin(const int a, const int b)$/;"	f	typeref:typename:int
+zatarMin3	libzatar/src/shared.c	/^int zatarMin3(const int a, const int b, const int c)$/;"	f	typeref:typename:int
