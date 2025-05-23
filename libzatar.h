@@ -1645,6 +1645,10 @@ Z_Str z_str_get_line(FILE *fp)
     s.len = getline(&s.ptr, &capacity, fp);
     s.capacity = capacity;
 
+    if (s.len == -1) {
+        return z_str_new("");
+    }
+
 	if (s.len > 0 && z_str_top_c(&s) == '\n') {
         z_str_pop_c(&s);
     }
