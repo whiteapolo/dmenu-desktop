@@ -63,8 +63,8 @@ int z_min3(int a, int b, int c);
 
 #define z_ensure_capacity(da, cap)                                                     \
     do {                                                                               \
-        int new_capacity = z_max((cap), (da)->capacity * Z_DEFAULT_GROWTH_RATE);       \
-        if (new_capacity > (da)->capacity) {                                           \
+        if ((da)->capacity < (cap)) {                                                      \
+            int new_capacity = z_max((cap), (da)->capacity * Z_DEFAULT_GROWTH_RATE);   \
             (da)->capacity = new_capacity;                                             \
             (da)->ptr = realloc((da)->ptr, sizeof((da)->ptr[0]) * (da)->capacity);     \
         }                                                                              \
@@ -314,6 +314,7 @@ void prefix##_put(type_name **root,                                    \
                      K key,                                            \
                      V value,                                          \
                      int cmp_keys(K, K),                               \
+                     void free_key(V),                                 \
                      void free_value(V));                              \
                                                                        \
 bool prefix##_is_exists(type_name *root,                               \
@@ -481,6 +482,7 @@ void prefix##_put(type_name **root,                                           \
                      K key,                                                   \
                      V value,                                                 \
                      int cmp_keys(K, K),                                      \
+                     void free_key(V),                                        \
                      void free_value(V))                                      \
 {                                                                             \
     if (*root == NULL) {                                                      \
@@ -491,11 +493,14 @@ void prefix##_put(type_name **root,                                           \
     int cmp_res = cmp_keys(key, (*root)->key);                                \
                                                                               \
     if (cmp_res > 0) {                                                        \
-        prefix##_put(&(*root)->right, key, value, cmp_keys, free_value);      \
+        prefix##_put(&(*root)->right, key, value, cmp_keys,                   \
+                free_key, free_value);                                        \
     } else if (cmp_res < 0) {                                                 \
-        prefix##_put(&(*root)->left, key, value, cmp_keys, free_value);       \
+        prefix##_put(&(*root)->left, key, value, cmp_keys,                    \
+                free_key, free_value);                                        \
     } else {                                                                  \
         CALL_F_IF_NOT_NULL(free_value, (*root)->value);                       \
+        CALL_F_IF_NOT_NULL(free_value, key);                                  \
         (*root)->value = value;                                               \
     }                                                                         \
                                                                               \
@@ -657,6 +662,7 @@ void prefix##_init(type_name *m, int cmp_keys(K, K));                  \
 void prefix##_put(type_name *m,                                        \
                   K key,                                               \
                   V value,                                             \
+                  void free_key(V),                                    \
                   void free_value(V));                                 \
                                                                        \
 bool prefix##_find(const type_name *m, K key, V *value);               \
@@ -688,9 +694,10 @@ void prefix##_init(type_name *m, int cmp_keys(K, K))                   \
 void prefix##_put(type_name *m,                                        \
                   K key,                                               \
                   V value,                                             \
+                  void free_key(V),                                    \
                   void free_value(V))                                  \
 {                                                                      \
-    _avl_##prefix##_put(&m->root, key, value, m->cmp_keys, free_value);\
+    _avl_##prefix##_put(&m->root, key, value, m->cmp_keys, free_key, free_value);\
 }                                                                      \
                                                                        \
 bool prefix##_find(const type_name *m, K key, V *value)                \
@@ -770,48 +777,6 @@ typedef struct {                  \
 //   *       *       *       *       *       *       *        *        *
 //
 //
-//   path header
-//
-//
-//   *       *       *       *       *       *       *        *        *
-//       *       *       *       *       *       *        *        *
-//   *       *       *       *       *       *       *        *        *
-//       *       *       *       *       *       *        *        *
-//   *       *       *       *       *       *       *        *        *
-
-typedef enum {
-    Z_Pipe_Mode_Read = 0,
-    Z_Pipe_Mode_Write = 1,
-} Z_Pipe_Mode;
-
-const char *z_get_path_extention(const char *path);
-const char *z_get_home_path();
-char *z_expand_path(const char *pathname);
-char *z_compress_path(const char *pathname);
-bool z_is_extention_equal(const char *path, const char *extention);
-
-Z_Result z_dir_traverse(const char *dir, bool action(const char *));
-
-bool z_is_dir(const char *pathname);
-bool z_is_regular_file(const char *pathname);
-bool z_is_path_exists(const char *pathname);
-
-Z_Result z_write_file(const char *pathname, const char *fmt, ...);
-Z_Result z_append_file(const char *pathname, const char *fmt, ...);
-Z_Result z_read_file(const char *pathname, const char *fmt, ...);
-
-Z_Result z_redirect_fd(int src_fd, const char *dst_pathname);
-Z_Result z_popen2(char *path, char *argv[], FILE *ppipe[2]);
-
-bool z_mkdir(const char *pathname);
-
-//   *       *       *       *       *       *       *        *        *
-//       *       *       *       *       *       *        *        *
-//   *       *       *       *       *       *       *        *        *
-//       *       *       *       *       *       *        *        *
-//   *       *       *       *       *       *       *        *        *
-//
-//
 //   string header
 //
 //
@@ -863,6 +828,49 @@ void z_str_free_ptr(Z_Str *s);
 void z_str_clear(Z_Str *s);
 Z_Str z_str_get_line(FILE *fp);
 Z_Result z_read_whole_file(Z_Str *s, const char *pathname);
+
+//   *       *       *       *       *       *       *        *        *
+//       *       *       *       *       *       *        *        *
+//   *       *       *       *       *       *       *        *        *
+//       *       *       *       *       *       *        *        *
+//   *       *       *       *       *       *       *        *        *
+//
+//
+//   path header
+//
+//
+//   *       *       *       *       *       *       *        *        *
+//       *       *       *       *       *       *        *        *
+//   *       *       *       *       *       *       *        *        *
+//       *       *       *       *       *       *        *        *
+//   *       *       *       *       *       *       *        *        *
+
+typedef enum {
+    Z_Pipe_Mode_Read = 0,
+    Z_Pipe_Mode_Write = 1,
+} Z_Pipe_Mode;
+
+const char *z_get_path_extention(const char *path);
+const char *z_get_home_path();
+void z_expand_path(const char *pathname, Z_Str *output);
+char *z_compress_path(const char *pathname);
+bool z_is_extention_equal(const char *path, const char *extention);
+
+Z_Result z_dir_traverse(const char *dir, bool action(const char *));
+
+bool z_is_dir(const char *pathname);
+bool z_is_regular_file(const char *pathname);
+bool z_is_path_exists(const char *pathname);
+
+Z_Result z_write_file(const char *pathname, const char *fmt, ...);
+Z_Result z_append_file(const char *pathname, const char *fmt, ...);
+Z_Result z_read_file(const char *pathname, const char *fmt, ...);
+
+Z_Result z_redirect_fd(int src_fd, const char *dst_pathname);
+Z_Result z_popen2(char *path, char *argv[], FILE *ppipe[2]);
+
+bool z_mkdir(const char *pathname);
+
 
 //   *       *       *       *       *       *       *        *        *
 //       *       *       *       *       *       *        *        *
@@ -1238,19 +1246,13 @@ const char *z_get_home_path()
     return home;
 }
 
-char *z_expand_path(const char *pathname)
+void z_expand_path(const char *pathname, Z_Str *output)
 {
     if (pathname[0] == '~') {
-
-        const char *home = z_get_home_path();
-        int size = z_get_fmt_size("%s%s", home, pathname + 1) + 1;
-        char *dst = malloc(sizeof(char) * size);
-        snprintf(dst, size, "%s%s", home, pathname + 1);
-
-        return dst;
+        z_str_push(output, "%s%s", z_get_home_path(), pathname + 1);
     }
 
-    return strdup(pathname);
+    z_str_push(output, "%s", pathname);
 }
 
 char *z_compress_path(const char *pathname)

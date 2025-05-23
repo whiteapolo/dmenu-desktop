@@ -1,6 +1,6 @@
 # Variables
 CC = cc
-CFLAGS = -Wall -Wextra -O0 -g
+CFLAGS = -Wall -Wextra -O3 -g
 TARGET = dmenu-desktop
 PREFIX = ~/.local/bin
 SRC = main.c

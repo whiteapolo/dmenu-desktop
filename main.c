@@ -63,11 +63,13 @@ Z_Result parseDesktopFile(const char *pathname, DesktopFile *desktopFile)
 
     while (z_str_tok_next(f, &line, "\n") == Z_Ok && (!has_name || !has_exec)) {
         if (!has_name && memcmp(line.ptr, "Name=", 5) == 0) {
-            desktopFile->name = z_str_new("%s", line.ptr + 5);
+            desktopFile->name = z_str_new("%.*s", line.len - 5, line.ptr + 5);
+            has_name = true;
         }
 
         if (!has_exec && memcmp(line.ptr, "Exec=", 5) == 0) {
-            desktopFile->exec = z_str_new("%s", line.ptr + 5);
+            desktopFile->exec = z_str_new("%.*s", line.len - 5, line.ptr + 5);
+            has_exec = true;
         }
     }
 
@@ -85,7 +87,7 @@ Z_Result parseDesktopFile(const char *pathname, DesktopFile *desktopFile)
         z_str_free(desktopFile->exec);
     }
 
-	return Z_Ok;
+	return Z_Err;
 }
 
 void proccessDesktopFile(const char *pathname, Map *programs)
@@ -94,10 +96,10 @@ void proccessDesktopFile(const char *pathname, Map *programs)
 
 	if (parseDesktopFile(pathname, &desktopFile) == Z_Ok) {
 		removeFieldCodes(&desktopFile.exec);
+        // TODO: implement trim
         // z_str_trim(&desktopFile.exec);
         // z_str_trim(&desktopFile.name);
-		map_put(programs, desktopFile.name, desktopFile.exec, NULL); //TODO: str free
-
+		map_put(programs, desktopFile.name, desktopFile.exec, z_str_free, z_str_free);
 	}
 }
 
@@ -124,23 +126,32 @@ void processDirectory(const char *dirPath, Map *programs)
 	closedir(dir);
 }
 
-void processDirectories(Map *programs, const char *dirs[])
+Map processDirectories(const char *dirs[])
 {
-    map_init(programs, z_str_cmp);
+    Map programs;
+    map_init(&programs, z_str_cmp);
+
+    Z_Str full_path;
+    z_str_init(&full_path, "");
 
 	for (int i = 0; dirs[i] != NULL; i++) {
-		char *full_path = z_expand_path(dirs[i]);
-		processDirectory(full_path, programs);
-        free(full_path);
+        z_str_clear(&full_path);
+		z_expand_path(dirs[i], &full_path);
+		processDirectory(full_path.ptr, &programs);
 	}
+
+    z_str_free(full_path);
+
+    return programs;
 }
 
 int excuteProgram(const Map *programs, Z_Str_Slice programName)
 {
-    z_str_println(programName);
+    Z_Str command = {0};
 
-    Z_Str command;
-    if (map_find(programs, programName, &command) == Z_Ok) {
+    printf("Selected: '%.*s'\n", programName.len, programName.ptr);
+
+    if (map_find(programs, programName, &command)) {
 
         int pid = fork();
 
@@ -149,8 +160,10 @@ int excuteProgram(const Map *programs, Z_Str_Slice programName)
         }
 
         if (pid == 0) {
+            printf("CMD: '%s'\n", command.ptr);
             z_redirect_fd(STDOUT_FILENO, "/dev/null");
             z_redirect_fd(STDERR_FILENO, "/dev/null");
+
             return system(command.ptr);
         }
     }
@@ -158,7 +171,7 @@ int excuteProgram(const Map *programs, Z_Str_Slice programName)
     return 0;
 }
 
-void printProgramName(Z_Str key, Z_Str  data, void *arg)
+void printProgramName(Z_Str key, Z_Str data, void *arg)
 {
     (void)data;
 	fprintf((FILE *)arg, "%s\n", key.ptr);
@@ -174,21 +187,19 @@ int main(int, char **argv)
         die("popen2()");
     }
 
-    Map programs;
-
+    Map programs = processDirectories(desktopAppsPath);
 	// pipe program names to dmenu
-	processDirectories(&programs, desktopAppsPath);
     map_order_traverse(&programs, printProgramName, pipe[Z_Pipe_Mode_Write]);
 	fclose(pipe[Z_Pipe_Mode_Write]);
 
 	// read dmenu output
-    Z_Str output = z_str_get_line(pipe[Z_Pipe_Mode_Read]);
+    Z_Str program_name = z_str_get_line(pipe[Z_Pipe_Mode_Read]);
 
-    if (!z_str_is_empty(output)) {
-        z_str_println(output);
+    if (!z_str_is_empty(program_name)) {
+        excuteProgram(&programs, program_name);
     }
 
-    z_str_free(output);
+    z_str_free(program_name);
 
 	fclose(pipe[Z_Pipe_Mode_Read]);
     map_free(&programs, z_str_free, z_str_free);
