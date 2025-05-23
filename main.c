@@ -177,8 +177,10 @@ void printProgramName(Z_Str key, Z_Str data, void *arg)
 	fprintf((FILE *)arg, "%s\n", key.ptr);
 }
 
-int main(int, char **argv)
+int main(int argc, char **argv)
 {
+    (void)argc;
+
 	FILE *pipe[2];
 	argv[0] = "dmenu";
 
@@ -188,6 +190,7 @@ int main(int, char **argv)
     }
 
     Map programs = processDirectories(desktopAppsPath);
+
 	// pipe program names to dmenu
     map_order_traverse(&programs, printProgramName, pipe[Z_Pipe_Mode_Write]);
 	fclose(pipe[Z_Pipe_Mode_Write]);

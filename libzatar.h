@@ -650,7 +650,7 @@ void prefix##_free(type_name *root,                                           \
 
 #define Z_MAP_DECLARE(type_name, K, V, prefix)                         \
                                                                        \
-Z_AVL_DECLARE(_avl_##type_name, K, V, _avl_##prefix);                  \
+Z_AVL_DECLARE(_avl_##type_name, K, V, _avl_##prefix)                   \
                                                                        \
 typedef struct {                                                       \
     _avl_##type_name *root;                                            \
@@ -683,7 +683,7 @@ void prefix##_free(type_name *m,                                       \
 
 #define Z_MAP_IMPLEMENT(type_name, K, V, prefix)                       \
                                                                        \
-Z_AVL_IMPLEMENT(_avl_##type_name, K, V, _avl_##prefix);                \
+Z_AVL_IMPLEMENT(_avl_##type_name, K, V, _avl_##prefix)                 \
                                                                        \
 void prefix##_init(type_name *m, int cmp_keys(K, K))                   \
 {                                                                      \
