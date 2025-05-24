@@ -61,6 +61,10 @@ int z_min(int a, int b);
 int z_max3(int a, int b, int c);
 int z_min3(int a, int b, int c);
 
+int z_print_error(const char *fmt, ...);
+int z_print_info(const char *fmt, ...);
+int z_print_warning(const char *fmt, ...);
+
 #define z_ensure_capacity(da, cap)                                                     \
     do {                                                                               \
         if ((da)->capacity < (cap)) {                                                      \
@@ -134,38 +138,30 @@ typedef enum {
     Z_CURSOR_STYLE_BEAM_BLINKING      = 5,
 } Z_CURSOR_STYLE;
 
+#define z_set_cursor_style(style)         printf("\033[%dq", (int)(style))
+#define z_disable_line_wrap()             printf("\033[?7l")
+#define z_enbale_line_wrap()              printf("\033[?7h")
+#define z_hide_cursor()                   printf("\033[?25l")
+#define z_show_cursor()                   printf("\033[?25h")
+#define z_set_cursor_pos(x, y)            printf("\033[%d;%dH", (y), (x))
+#define z_set_cursor_x(x)                 printf("\033[%dG", (x))
+#define z_cursor_up(n)                    printf("\033[%dA", (n))
+#define z_cursor_down(n)                  printf("\033[%dB", (n))
+#define z_cursor_right(n)                 printf("\033[%dC", (n))
+#define z_cursor_left(n)                  printf("\033[%dD", (n))
+// unsupported on some terminals
+#define z_save_cursor_pos()               printf("\033[s")
+#define z_restore_cursor_pos()            printf("\033[u")
+#define z_enter_alternative_screen()      printf("\033[?1049h")
+#define z_exit_alternative_screen()       printf("\033[?1049l")
+#define z_clear_line()                    printf("\033[K")
+#define z_clear_screen()                  printf("\033[2J")
+#define z_update_screen()                 fflush(stdout)
+
 Z_Result z_enable_raw_mode(int vminKeys, int vtime);
 Z_Result z_disable_raw_mode();
 
-void z_disable_line_wrap();
-void z_enbale_line_wrap();
-
-void z_hide_cursor();
-void z_show_cursor();
-
-void z_set_cursor_style(Z_CURSOR_STYLE style);
-
 Z_Result z_get_cursor_pos(int *x, int *y);
-void z_set_cursor_pos(int x, int y);
-
-void z_set_cursor_x(int x);
-
-void z_cursor_up(int n);
-void z_cursor_down(int n);
-void z_cursor_right(int n);
-void z_cursor_left(int n);
-
-// unsupported on some terminals
-void z_save_cursor_pos();
-void z_restore_cursor_pos();
-
-void z_enter_alternative_screen();
-void z_exit_alternative_screen();
-
-void z_clear_line();
-void z_clear_screen();
-
-void z_update_screen();
 
 Z_Result z_get_screen_size_by_cursor(int *width, int *height);
 Z_Result z_get_screen_size_by_ioctl(int *width, int *height);
@@ -757,18 +753,31 @@ typedef struct {                  \
     T *ptr;                       \
     int x;                        \
     int y;                        \
+    int capacity;                 \
 } name;
 
-#define Z_MAT_AT(mat, x, y) ((mat)->ptr[(y) * (mat)->x + x])
+#define Z_MAT_AT(mat, _y, _x) ((mat)->ptr[(_y) * (mat)->x + (_x)])
 
-#define Z_MAT_INIT(mat, x, y)                                     \
-    do {                                                          \
-        (mat)->ptr = malloc(sizeof((mat)->ptr[0]) * (x) * (y));   \
-        (mat)->x = x;                                             \
-        (mat)->y = y;                                             \
+#define Z_MAT_INIT(mat, _x, _y)                                     \
+    do {                                                            \
+        (mat)->ptr = malloc(sizeof((mat)->ptr[0]) * (_x) * (_y));   \
+        (mat)->x = (_x);                                            \
+        (mat)->y = (_y);                                            \
+        (mat)->capacity = (_x) * (_y);                              \
     } while (0)
 
-#define Z_MAT_FREE(mat) free((mat)->ptr)
+#define Z_MAT_RESIZE(mat, _x, _y)                                                   \
+    do {                                                                            \
+        if ((mat)->capacity < (_x) * (_y)) {                                        \
+            (mat)->capacity = (_x) * (_y);                                          \
+            (mat)->ptr = realloc((mat)->ptr, sizeof((mat)->ptr[0]) * (_x) * (_y));  \
+        }                                                                           \
+                                                                                    \
+        (mat)->x = (_x);                                                            \
+        (mat)->y = (_y);                                                            \
+    } while (0)
+
+#define Z_MAT_FREE(mat) do { free((mat)->ptr); (mat)->ptr = NULL; } while (0)
 
 //   *       *       *       *       *       *       *        *        *
 //       *       *       *       *       *       *        *        *
@@ -888,15 +897,6 @@ bool z_mkdir(const char *pathname);
 //       *       *       *       *       *       *        *        *
 //   *       *       *       *       *       *       *        *        *
 
-#define z_print_error(fmt, ...)	\
-    printf("[" Z_COLOR_RED "ERROR" Z_COLOR_RESET "] " fmt "\n", ##__VA_ARGS__)
-
-#define z_print_warning(fmt, ...) \
-    printf("[" Z_COLOR_YELLOW "WARNING" Z_COLOR_RESET "] " fmt "\n", ##__VA_ARGS__)
-
-#define z_print_info(fmt, ...) \
-    printf("[" Z_COLOR_GREEN "INFO" Z_COLOR_RESET "] " fmt "\n", ##__VA_ARGS__)
-
 typedef struct {
 	char **ptr;
 	int len;
@@ -963,6 +963,42 @@ void z_cmd_clear(Z_Cmd *cmd);
 //   *       *       *       *       *       *       *        *        *
 //       *       *       *       *       *       *        *        *
 //   *       *       *       *       *       *       *        *        *
+
+int z_print_error(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    printf("[" Z_COLOR_RED "ERROR" Z_COLOR_RESET "] ");
+    int n = vprintf(fmt, ap);
+    printf("\n");
+    va_end(ap);
+
+    return n;
+}
+
+int z_print_warning(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    printf("[" Z_COLOR_YELLOW "WARNING" Z_COLOR_RESET "] ");
+    int n = vprintf(fmt, ap);
+    printf("\n");
+    va_end(ap);
+
+    return n;
+}
+
+int z_print_info(const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    printf("[" Z_COLOR_GREEN "INFO" Z_COLOR_RESET "] ");
+    int n = vprintf(fmt, ap);
+    printf("\n");
+    va_end(ap);
+
+    return n;
+}
 
 void z_swap(void *a, void *b, const size_t size)
 {
@@ -1090,24 +1126,6 @@ Z_Result z_get_cursor_pos(int *x, int *y)
 
     return Z_Err;
 }
-
-#define z_set_cursor_style(style)         printf("\033[%d q", (int)(style))
-#define z_disable_line_wrap()             printf("\033[?7l")
-#define z_enbale_line_wrap()              printf("\033[?7h")
-#define z_hide_cursor()                   printf("\033[?25l")
-#define z_show_cursor()                   printf("\033[?25h")
-#define z_set_cursor_pos(x, y)            printf("\033[%d;%dH", (y), (x))
-#define z_set_cursor_x(x)                 printf("\033[%dG", (x))
-#define z_cursor_up(n)                    printf("\033[%dA", (n))
-#define z_cursor_down(n)                  printf("\033[%dB", (n))
-#define z_cursor_right(n)                 printf("\033[%dC", (n))
-#define z_cursor_left(n)                  printf("\033[%dD", (n))
-#define z_save_cursor_pos()               printf("\033[s")
-#define z_restore_cursor_pos()            printf("\033[u")
-#define z_enter_alternative_screen()      printf("\033[?1049h")
-#define z_exit_alternative_screen()       printf("\033[?1049l")
-#define z_clear_line()                    printf("\033[K")
-#define z_clear_screen()                  printf("\033[2J")
 
 Z_Result z_get_screen_size_by_cursor(int *width, int *height)
 {
