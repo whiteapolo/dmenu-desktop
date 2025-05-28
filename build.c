@@ -31,8 +31,6 @@ void clean()
 
     if (status == 0) {
         z_print_info("removed '%s'", TARGET);
-    } else {
-        z_print_error("unable to remove '%s': %s", TARGET, strerror(errno));
     }
 }
 
