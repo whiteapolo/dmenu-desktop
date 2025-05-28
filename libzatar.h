@@ -205,6 +205,7 @@ void prefix##_add(name *v, T data);                                    \
 T prefix##_remove_last(name *v);                                       \
 int prefix##_len(const name *v);                                       \
 bool prefix##_is_empty(const name *v);                                 \
+int prefix##_find(const name *v, T data, void cmp(T, T));              \
 void prefix##_for_each(name *v, void function(T));                     \
 void prefix##_free(name *v, void free_function(T));                    \
 void prefix##_print(const name *v, void print_data(T));
@@ -243,6 +244,25 @@ int prefix##_len(const name *v)                                        \
 bool prefix##_is_empty(const name *v)                                  \
 {                                                                      \
     return v->len == 0;                                                \
+}                                                                      \
+                                                                       \
+int prefix##_find(const name *v, T data, void cmp(T, T))               \
+{                                                                      \
+    if (cmp) {                                                         \
+        for (int i = 0; i < v->len; i++) {                             \
+            if (cmp(data, v->ptr[i]) == 0) {                           \
+                return i;                                              \
+            }                                                          \
+        }                                                              \
+    } else {                                                           \
+        for (int i = 0; i < v->len; i++) {                             \
+            if (data == v->ptr[i]) {                                   \
+                return i;                                              \
+            }                                                          \
+        }                                                              \
+    }                                                                  \
+                                                                       \
+    return -1;                                                         \
 }                                                                      \
                                                                        \
 void prefix##_for_each(name *v, void function(T))                      \
@@ -310,7 +330,7 @@ void prefix##_put(type_name **root,                                    \
                      K key,                                            \
                      V value,                                          \
                      int cmp_keys(K, K),                               \
-                     void free_key(V),                                 \
+                     void free_key(K),                                 \
                      void free_value(V));                              \
                                                                        \
 bool prefix##_is_exists(type_name *root,                               \
@@ -478,7 +498,7 @@ void prefix##_put(type_name **root,                                           \
                      K key,                                                   \
                      V value,                                                 \
                      int cmp_keys(K, K),                                      \
-                     void free_key(V),                                        \
+                     void free_key(K),                                        \
                      void free_value(V))                                      \
 {                                                                             \
     if (*root == NULL) {                                                      \
@@ -496,7 +516,7 @@ void prefix##_put(type_name **root,                                           \
                 free_key, free_value);                                        \
     } else {                                                                  \
         CALL_F_IF_NOT_NULL(free_value, (*root)->value);                       \
-        CALL_F_IF_NOT_NULL(free_value, key);                                  \
+        CALL_F_IF_NOT_NULL(free_key, key);                                  \
         (*root)->value = value;                                               \
     }                                                                         \
                                                                               \
@@ -658,7 +678,7 @@ void prefix##_init(type_name *m, int cmp_keys(K, K));                  \
 void prefix##_put(type_name *m,                                        \
                   K key,                                               \
                   V value,                                             \
-                  void free_key(V),                                    \
+                  void free_key(K),                                    \
                   void free_value(V));                                 \
                                                                        \
 bool prefix##_find(const type_name *m, K key, V *value);               \
@@ -690,7 +710,7 @@ void prefix##_init(type_name *m, int cmp_keys(K, K))                   \
 void prefix##_put(type_name *m,                                        \
                   K key,                                               \
                   V value,                                             \
-                  void free_key(V),                                    \
+                  void free_key(K),                                    \
                   void free_value(V))                                  \
 {                                                                      \
     _avl_##prefix##_put(&m->root, key, value, m->cmp_keys, free_key, free_value);\
