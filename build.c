@@ -39,7 +39,10 @@ void install()
     int status = build();
 
     if (status == 0) {
-        z_run_async("cp", TARGET, INSTALL_PATH);
+        Z_Cmd cmd = {0};
+        z_cmd_append(&cmd, "cp", TARGET, INSTALL_PATH);
+        z_cmd_run_async(&cmd);
+        z_cmd_free(&cmd);
     }
 }
 
@@ -69,8 +72,7 @@ int main(int argc, char **argv)
         return build();
     }
 
-    Map params;
-    map_init(&params, (int (*)(char*, char*)) strcmp);
+    Map params = { NULL, strcmp };
 
     map_put(&params, "clean", clean, NULL, NULL);
     map_put(&params, "install", install, NULL, NULL);
