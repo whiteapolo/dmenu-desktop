@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <sys/ucontext.h>
 #include <unistd.h>
 
 #define LIBZATAR_IMPLEMENTATION
@@ -70,15 +71,17 @@ bool parseDesktopFile(const char *pathname, DesktopFile *desktopFile)
     bool has_exec = false;
 
     while (line.len > 0 && (!has_name || !has_exec)) {
-        if (!has_name && line.len > 5 && z_str_n_cmp(line, Z_CSTR_TO_SV("Name="), 5)) {
+        if (!has_name && line.len > 5 && z_str_n_cmp(line, Z_CSTR_TO_SV("Name="), 5) == 0) {
             desktopFile->name = z_str_new("%.*s", line.len - 5, line.ptr + 5);
             has_name = true;
         }
 
-        if (!has_exec && line.len > 5 && z_str_n_cmp(line, Z_CSTR_TO_SV("Exec="), 5)) {
+        if (!has_exec && line.len > 5 && z_str_n_cmp(line, Z_CSTR_TO_SV("Exec="), 5) == 0) {
             desktopFile->exec = z_str_new("%.*s", line.len - 5, line.ptr + 5);
             has_exec = true;
         }
+
+        line = z_str_tok_next(&tok);
     }
 
     z_str_free(&f);
@@ -110,6 +113,8 @@ void proccessDesktopFile(const char *pathname, Map *programs)
         const char *exec = z_str_to_cstr(&desktopFile.exec);
         const char *name = z_str_to_cstr(&desktopFile.name);
 		map_put(programs, strdup(name), strdup(exec), frees, frees);
+        z_str_free(&desktopFile.exec);
+        z_str_free(&desktopFile.name);
 	}
 }
 
@@ -175,6 +180,8 @@ int excuteProgram(const Map *programs, const char *programName)
 
             return system(command);
         }
+    } else {
+        fprintf(stderr, "Not a program: '%s'\n", programName);
     }
 
     return 0;

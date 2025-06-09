@@ -713,7 +713,7 @@ typedef struct {
 #define Z_SV(p, l)          ((Z_String_View){ .ptr = (p), .len = (l)            })
 #define Z_STR_TO_SV(s)      ((Z_String_View){ .ptr = (s).ptr, .len = (s).len    })
 #define Z_CSTR_TO_SV(s)     ((Z_String_View){ .ptr = (s), .len = strlen(s)      })
-#define Z_EMPTY_SV()        ((Z_String_View){ .ptr = NULL, .len = 0             })
+#define Z_EMPTY_SV()        ((Z_String_View){ .ptr = "", .len = 0               })
 
 const char *z_str_to_cstr(Z_String *s);
 Z_String z_str_new(const char *fmt, ...);
@@ -1174,8 +1174,8 @@ Z_String_View z_get_path_extention(Z_String_View path)
     }
 
     Z_String_View extention = {
-        .ptr = path.ptr + start,
-        .len = path.len - start,
+        .ptr = path.ptr + start + 1,
+        .len = path.len - start - 1,
     };
 
     return extention;
