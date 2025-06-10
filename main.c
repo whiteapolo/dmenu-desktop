@@ -87,6 +87,8 @@ bool parseDesktopFile(const char *pathname, DesktopFile *desktopFile)
     z_str_free(&f);
 
     if (has_name && has_exec) {
+        z_str_trim(&desktopFile->name);
+        z_str_trim(&desktopFile->exec);
         return true;
     }
 
@@ -107,9 +109,6 @@ void proccessDesktopFile(const char *pathname, Map *programs)
 
 	if (parseDesktopFile(pathname, &desktopFile)) {
 		removeFieldCodes(&desktopFile.exec);
-        // TODO: implement trim
-        // z_str_trim(&desktopFile.exec);
-        // z_str_trim(&desktopFile.name);
         const char *exec = z_str_to_cstr(&desktopFile.exec);
         const char *name = z_str_to_cstr(&desktopFile.name);
 		map_put(programs, strdup(name), strdup(exec), frees, frees);
@@ -214,6 +213,7 @@ int main(int argc, char **argv)
 	// read dmenu output
     Z_String program_name = {0};
     z_str_get_line(pipe[Z_Pipe_Mode_Read], &program_name);
+    z_str_trim(&program_name);
 
     if (program_name.len > 0) {
         excuteProgram(&programs, z_str_to_cstr(&program_name));

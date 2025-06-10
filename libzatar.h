@@ -1549,11 +1549,43 @@ Z_String_View z_str_tok_next(Z_String_Tokonizer *tok)
     return Z_SV(start, tok->curr - start);
 }
 
-void z_str_trim(Z_String *s);
-void z_str_trim_cset(Z_String *s, Z_String_View cset);
+void z_str_trim(Z_String *s)
+{
+    z_str_trim_cset(s, Z_CSTR_TO_SV(" \f\t\v\n\r"));
+}
 
-Z_String_View z_str_view_trim(Z_String_View s);
-Z_String_View z_str_view_trim_cset(Z_String_View s, Z_String_View cset);
+void z_str_trim_cset(Z_String *s, Z_String_View cset)
+{
+    Z_String_View trimmed = z_str_view_trim_cset(Z_STR_TO_SV(*s), cset);
+    memmove(s->ptr, trimmed.ptr, trimmed.len);
+    s->len = trimmed.len;
+}
+
+Z_String_View z_str_view_trim(Z_String_View s)
+{
+    return z_str_view_trim_cset(s, Z_CSTR_TO_SV(" \f\t\v\n\r"));
+}
+
+Z_String_View z_str_view_trim_cset(Z_String_View s, Z_String_View cset)
+{
+    const char *start = s.ptr;
+    const char *end = s.ptr + s.len - 1;
+
+    while (start < end && z_str_chr(cset, *start) >= 0) {
+        start++;
+    }
+
+    while (start < end && z_str_chr(cset, *end) >= 0) {
+        end--;
+    }
+
+    Z_String_View ret = {
+        .ptr = start,
+        .len = end - start + 1,
+    };
+
+    return ret;
+}
 
 void z_str_print(Z_String_View s)
 {
