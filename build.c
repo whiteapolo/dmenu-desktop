@@ -12,7 +12,7 @@ Z_MAP_IMPLEMENT(Map, char *, voidFunc, map)
 
 int build()
 {
-    if (!z_should_rebuild(TARGET, "main.c")) {
+    if (!z_should_rebuild(TARGET, "main.c", "libzatar.h")) {
         return 0;
     }
 
