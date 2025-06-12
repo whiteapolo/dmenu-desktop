@@ -15,7 +15,7 @@
 Z_MAP_DECLARE(Map, char *, char *, map)
 Z_MAP_IMPLEMENT(Map, char *, char *, map)
 
-const char *desktopAppsPath[] = {
+const char *desktop_files_directories[] = {
 	"/usr/share/applications",
 	"~/.local/share/applications",
 	"/var/lib/flatpak/exports/share/applications",
@@ -177,6 +177,11 @@ int execute_program(const Map *programs, const char *programName)
         printf("running: '%s'\n", command);
         z_redirect_fd(STDOUT_FILENO, "/dev/null");
         z_redirect_fd(STDERR_FILENO, "/dev/null");
+
+        if (setsid() < 0) {
+            die("setsid failed");
+        }
+
         return system(command);
     }
 
@@ -201,7 +206,7 @@ int main(int argc, char **argv)
         die("popen2()");
     }
 
-    Map programs = process_directories(desktopAppsPath);
+    Map programs = process_directories(desktop_files_directories);
 
 	// pipe program names to dmenu
     map_order_traverse(&programs, write_string_to_file, pipe[Z_Pipe_Mode_Write]);
