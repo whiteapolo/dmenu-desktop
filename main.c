@@ -40,7 +40,7 @@ void die(const char *s)
 
 void removeFieldCodes(Z_String *s)
 {
-    Z_String tmp = z_str_new("");
+    Z_String tmp = {0};
 
 	int i = 0;
 
@@ -48,72 +48,69 @@ void removeFieldCodes(Z_String *s)
 		if (s->ptr[i] == '%') {
             i += 2;
         } else {
-            z_str_push_c(&tmp, s->ptr[i++]);
+            z_str_append_char(&tmp, s->ptr[i++]);
         }
 	}
 
-    z_str_free(s);
-    *s = tmp;
+    z_str_clear(s);
+    z_str_append_str(s, Z_STR_TO_SV(tmp));
+    z_str_free(&tmp);
 }
 
 bool parseDesktopFile(const char *pathname, DesktopFile *desktopFile)
 {
-    Z_String f = {0};
-    if (!z_read_whole_file(pathname, &f)) {
+    Z_String file_content = {0};
+
+    if (!z_read_whole_file(pathname, &file_content)) {
         return false;
     }
-
-    Z_String_Tokonizer tok;
-    z_str_tok_init(&tok, Z_STR_TO_SV(f), Z_CSTR_TO_SV("\n"));
-    Z_String_View line = z_str_tok_next(&tok);
 
     bool has_name = false;
     bool has_exec = false;
 
+    // initialize both strings
+    memset(desktopFile, 0, sizeof(DesktopFile));
+
+    Z_String_View delim = Z_CSTR_TO_SV("\n");
+    Z_String_View line = z_str_tok_start(Z_STR_TO_SV(file_content), delim);
+
     while (line.len > 0 && (!has_name || !has_exec)) {
-        if (!has_name && line.len > 5 && z_str_n_cmp(line, Z_CSTR_TO_SV("Name="), 5) == 0) {
-            desktopFile->name = z_str_new("%.*s", line.len - 5, line.ptr + 5);
+        if (!has_name && line.len > 5 && z_str_compare_n(line, Z_CSTR_TO_SV("Name="), 5) == 0) {
+            desktopFile->name = z_str_new_format("%.*s", line.len - 5, line.ptr + 5);
             has_name = true;
         }
 
-        if (!has_exec && line.len > 5 && z_str_n_cmp(line, Z_CSTR_TO_SV("Exec="), 5) == 0) {
-            desktopFile->exec = z_str_new("%.*s", line.len - 5, line.ptr + 5);
+        if (!has_exec && line.len > 5 && z_str_compare_n(line, Z_CSTR_TO_SV("Exec="), 5) == 0) {
+            desktopFile->exec = z_str_new_format("%.*s", line.len - 5, line.ptr + 5);
             has_exec = true;
         }
 
-        line = z_str_tok_next(&tok);
+        line = z_str_tok_next(Z_STR_TO_SV(file_content), line, delim);
     }
 
-    z_str_free(&f);
+    z_str_free(&file_content);
+    z_str_trim(&desktopFile->name);
+    z_str_trim(&desktopFile->exec);
 
     if (has_name && has_exec) {
-        z_str_trim(&desktopFile->name);
-        z_str_trim(&desktopFile->exec);
         return true;
     }
 
-    if (has_name) {
-        z_str_free(&desktopFile->name);
-    }
-
-    if (has_exec) {
-        z_str_free(&desktopFile->exec);
-    }
+    z_str_free(&(desktopFile->name));
+    z_str_free(&desktopFile->exec);
 
 	return false;
 }
 
 void proccessDesktopFile(const char *pathname, Map *programs)
 {
-	DesktopFile desktopFile;
+	DesktopFile desktopFile = {0};
 
 	if (parseDesktopFile(pathname, &desktopFile)) {
 		removeFieldCodes(&desktopFile.exec);
-        const char *exec = z_str_to_cstr(&desktopFile.exec);
-        const char *name = z_str_to_cstr(&desktopFile.name);
-		map_put(programs, strdup(name), strdup(exec), frees, frees);
-        z_str_free(&desktopFile.exec);
-        z_str_free(&desktopFile.name);
+        char *exec = desktopFile.exec.ptr;
+        char *name = desktopFile.name.ptr;
+		map_put(programs, name, exec, frees, frees);
 	}
 }
 
@@ -126,13 +123,13 @@ void processDirectory(const char *dirPath, Map *programs)
 
     struct dirent *entry;
 
-    Z_String full_path = z_str_new("");
+    Z_String full_path = {0};
 
     while ((entry = readdir(dir)) != NULL) {
         Z_String_View extention = z_get_path_extention(Z_CSTR_TO_SV(entry->d_name));
-        if (z_str_cmp(extention, Z_CSTR_TO_SV("desktop")) == 0) {
+        if (z_str_compare(extention, Z_CSTR_TO_SV("desktop")) == 0) {
             z_str_clear(&full_path);
-            z_str_pushf(&full_path, "%s/%s", dirPath, entry->d_name);
+            z_str_append_format(&full_path, "%s/%s", dirPath, entry->d_name);
             proccessDesktopFile(full_path.ptr, programs);
         }
     }
@@ -160,7 +157,7 @@ Map processDirectories(const char *dirs[])
 
 int excuteProgram(const Map *programs, const char *programName)
 {
-    printf("Selected: '%s'\n", programName);
+    printf("selected program: '%s'\n", programName);
 
     char *command;
 
@@ -173,7 +170,7 @@ int excuteProgram(const Map *programs, const char *programName)
         }
 
         if (pid == 0) {
-            printf("CMD: '%s'\n", command);
+            printf("running: '%s'\n", command);
             z_redirect_fd(STDOUT_FILENO, "/dev/null");
             z_redirect_fd(STDERR_FILENO, "/dev/null");
 

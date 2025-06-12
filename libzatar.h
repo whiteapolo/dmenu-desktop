@@ -704,33 +704,30 @@ typedef struct {
     int len;
 } Z_String_View;
 
-typedef struct {
-    const char *curr;
-    const char *end;
-    Z_String_View delim;
-} Z_String_Tokonizer;
-
 #define Z_SV(p, l)          ((Z_String_View){ .ptr = (p), .len = (l)            })
 #define Z_STR_TO_SV(s)      ((Z_String_View){ .ptr = (s).ptr, .len = (s).len    })
 #define Z_CSTR_TO_SV(s)     ((Z_String_View){ .ptr = (s), .len = strlen(s)      })
 #define Z_EMPTY_SV()        ((Z_String_View){ .ptr = "", .len = 0               })
 
 const char *z_str_to_cstr(Z_String *s);
-Z_String z_str_new(const char *fmt, ...);
-Z_String z_str_new_va(const char *fmt, va_list ap);
-void z_str_pushf(Z_String *s, const char *fmt, ...);
-void z_str_pushf_va(Z_String *s, const char *fmt, va_list ap);
-void z_str_push(Z_String *dst, Z_String_View src);
-void z_str_push_c(Z_String *s, char c);
-char z_str_pop_c(Z_String *s);
-char z_str_top_c(Z_String_View s);
-int z_str_cmp(Z_String_View s1, Z_String_View s2);
-int z_str_n_cmp(Z_String_View s1, Z_String_View s2, int n);
+Z_String z_str_new_format(const char *fmt, ...);
+Z_String z_str_new_format_va(const char *fmt, va_list ap);
+void z_str_append_format(Z_String *s, const char *fmt, ...);
+void z_str_append_format_va(Z_String *s, const char *fmt, va_list ap);
+void z_str_append_str(Z_String *dst, Z_String_View src);
+void z_str_append_char(Z_String *s, char c);
+char z_str_pop_char(Z_String *s);
+char z_str_top_char(Z_String_View s);
+int z_str_compare(Z_String_View s1, Z_String_View s2);
+int z_str_compare_n(Z_String_View s1, Z_String_View s2, int n);
 void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement);
 char *z_sv_to_cstr(Z_String_View s);
 
-void z_str_tok_init(Z_String_Tokonizer *tok, Z_String_View s, Z_String_View delim);
-Z_String_View z_str_tok_next(Z_String_Tokonizer *tok);
+bool z_str_contains(Z_String_View s, char c);
+int z_str_chr(Z_String_View s, char c);
+
+Z_String_View z_str_tok_start(Z_String_View s, Z_String_View delim);
+Z_String_View z_str_tok_next(Z_String_View s, Z_String_View previous_token, Z_String_View delim);
 
 void z_str_trim(Z_String *s);
 void z_str_trim_cset(Z_String *s, Z_String_View cset);
@@ -1207,11 +1204,11 @@ void z_expand_path(Z_String_View p, Z_String *out)
     Z_String_View home = z_get_home_path();
 
     if (p.ptr[0] == '~') {
-        z_str_pushf(out, "%.*s%.*s", home.len, home.ptr, p.len - 1, p.ptr + 1);
+        z_str_append_format(out, "%.*s%.*s", home.len, home.ptr, p.len - 1, p.ptr + 1);
         return;
     }
 
-    z_str_pushf(out, "%.*s", p.len, p.ptr);
+    z_str_append_format(out, "%.*s", p.len, p.ptr);
     return;
 }
 
@@ -1219,11 +1216,11 @@ Z_String z_compress_path(Z_String_View p)
 {
     Z_String_View home = z_get_home_path();
 
-    if (home.len <= p.len && z_str_n_cmp(p, home, home.len) == 0) {
-        return z_str_new("~%.*s", p.len - home.len, p.ptr + home.len);
+    if (home.len <= p.len && z_str_compare_n(p, home, home.len) == 0) {
+        return z_str_new_format("~%.*s", p.len - home.len, p.ptr + home.len);
     }
 
-    return z_str_new("%.*s", p.len, p.ptr);
+    return z_str_new_format("%.*s", p.len, p.ptr);
 }
 
 bool z_dir_traverse(const char *dir, bool action(const char *))
@@ -1241,7 +1238,7 @@ bool z_dir_traverse(const char *dir, bool action(const char *))
     while ((de = readdir(dr))) {
 
         z_str_clear(&full_path);
-        z_str_pushf(&full_path, "%s/%s", dir, de->d_name);
+        z_str_append_format(&full_path, "%s/%s", dir, de->d_name);
 
         if (action(full_path.ptr) == false) {
             break;
@@ -1256,7 +1253,7 @@ bool z_dir_traverse(const char *dir, bool action(const char *))
 
 bool z_is_extention_equal(Z_String_View pathname, Z_String_View extention)
 {
-    return z_str_cmp(z_get_path_extention(pathname), extention) == 0;
+    return z_str_compare(z_get_path_extention(pathname), extention) == 0;
 }
 
 bool z_is_dir(const char *pathname)
@@ -1426,33 +1423,33 @@ const char *z_str_to_cstr(Z_String *s)
     return s->ptr;
 }
 
-Z_String z_str_new(const char *fmt, ...)
+Z_String z_str_new_format(const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    Z_String s = z_str_new_va(fmt, ap);
+    Z_String s = z_str_new_format_va(fmt, ap);
     va_end(ap);
 
     return s;
 }
 
-Z_String z_str_new_va(const char *fmt, va_list ap)
+Z_String z_str_new_format_va(const char *fmt, va_list ap)
 {
     Z_String s = {0};
-    z_str_pushf_va(&s, fmt, ap);
+    z_str_append_format_va(&s, fmt, ap);
 
     return s;
 }
 
-void z_str_pushf(Z_String *s, const char *fmt, ...)
+void z_str_append_format(Z_String *s, const char *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    z_str_pushf_va(s, fmt, ap);
+    z_str_append_format_va(s, fmt, ap);
     va_end(ap);
 }
 
-void z_str_pushf_va(Z_String *s, const char *fmt, va_list ap)
+void z_str_append_format_va(Z_String *s, const char *fmt, va_list ap)
 {
     int len = z_get_fmt_size_va(fmt, ap);
     z_da_ensure_capacity(s, s->len + len + 1);
@@ -1465,44 +1462,38 @@ void z_str_pushf_va(Z_String *s, const char *fmt, va_list ap)
     s->len = s->len + len;
 }
 
-void z_str_push(Z_String *dst, Z_String_View src)
+void z_str_append_str(Z_String *dst, Z_String_View src)
 {
-    z_str_pushf(dst, "%.*s", src.len, src.ptr);
+    z_str_append_format(dst, "%.*s", src.len, src.ptr);
 }
 
-void z_str_push_c(Z_String *s, char c)
+void z_str_append_char(Z_String *s, char c)
 {
     z_da_ensure_capacity(s, s->len + 1);
     s->ptr[s->len++] = c;
     z_da_null_terminate(s);
 }
 
-char z_str_pop_c(Z_String *s)
+char z_str_pop_char(Z_String *s)
 {
     return s->ptr[--s->len];
 }
 
-char z_str_top_c(Z_String_View s)
+char z_str_top_char(Z_String_View s)
 {
     return s.ptr[s.len - 1];
 }
 
-int z_str_cmp(Z_String_View s1, Z_String_View s2)
+int z_str_compare(Z_String_View s1, Z_String_View s2)
 {
-    if (s1.len > s2.len) {
-        return 1;
-    } else if (s1.len < s2.len) {
-        return -1;
-    } else {
-        return memcmp(s1.ptr, s2.ptr, s1.len);
-    }
+    if (s1.len > s2.len) return 1;
+    if (s1.len < s2.len) return -1;
+    return memcmp(s1.ptr, s2.ptr, s1.len);
 }
 
-int z_str_n_cmp(Z_String_View s1, Z_String_View s2, int n)
+int z_str_compare_n(Z_String_View s1, Z_String_View s2, int n)
 {
-    assert(s1.len >= n && s2.len >= n);
-
-    return memcmp(s1.ptr, s2.ptr, n);
+    return memcmp(s1.ptr, s2.ptr, z_min3(s1.len, s2.len, n));
 }
 
 void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement);
@@ -1512,11 +1503,9 @@ char *z_sv_to_cstr(Z_String_View s)
     return strndup(s.ptr, s.len);
 }
 
-void z_str_tok_init(Z_String_Tokonizer *tok, Z_String_View s, Z_String_View delim)
+bool z_str_contains(Z_String_View s, char c)
 {
-    tok->curr = s.ptr;
-    tok->end = s.ptr + s.len;
-    tok->delim = delim;
+    return z_str_chr(s, c) >= 0;
 }
 
 int z_str_chr(Z_String_View s, char c)
@@ -1530,23 +1519,32 @@ int z_str_chr(Z_String_View s, char c)
     return -1;
 }
 
-Z_String_View z_str_tok_next(Z_String_Tokonizer *tok)
+Z_String_View z_str_tok_from(Z_String_View s, int start_offset, Z_String_View delim)
 {
-    while (tok->curr < tok->end && z_str_chr(tok->delim, *tok->curr) >= 0) {
-        tok->curr++;
+    const char *end = s.ptr + s.len;
+    const char *ptr = s.ptr + start_offset;
+    int len = 0;
+
+    while (ptr < end && z_str_contains(delim, *ptr)) {
+        ptr++;
     }
 
-    if (tok->curr >= tok->end) {
-        return Z_EMPTY_SV();
+    while (ptr + len < end && !z_str_contains(delim, ptr[len])) {
+        len++;
     }
 
-    const char *start = tok->curr;
+    return Z_SV(ptr, len);
+}
 
-    while (tok->curr < tok->end && z_str_chr(tok->delim, *tok->curr) < 0) {
-        tok->curr++;
-    }
+Z_String_View z_str_tok_start(Z_String_View s, Z_String_View delim)
+{
+    return z_str_tok_from(s, 0, delim);
+}
 
-    return Z_SV(start, tok->curr - start);
+Z_String_View z_str_tok_next(Z_String_View s, Z_String_View previous_token, Z_String_View delim)
+{
+    int start_offset = previous_token.ptr + previous_token.len - s.ptr;
+    return z_str_tok_from(s, start_offset, delim);
 }
 
 void z_str_trim(Z_String *s)
@@ -1568,6 +1566,10 @@ Z_String_View z_str_view_trim(Z_String_View s)
 
 Z_String_View z_str_view_trim_cset(Z_String_View s, Z_String_View cset)
 {
+    if (s.len == 0) {
+        return Z_EMPTY_SV();
+    }
+
     const char *start = s.ptr;
     const char *end = s.ptr + s.len - 1;
 
@@ -1634,7 +1636,7 @@ void z_str_get_line(FILE *fp, Z_String *out)
     char buf[BUFSIZ];
 
     while (fgets(buf, BUFSIZ, fp)) {
-        z_str_pushf(out, "%s", buf);
+        z_str_append_format(out, "%s", buf);
     }
 }
 
@@ -1821,165 +1823,6 @@ void z_cmd_clear(Z_Cmd *cmd)
 
 #endif // end implementation
 #endif // end header
-
-#ifndef LIBZATAR_STRIP_PREFIX_GAURD
-#define LIBZATAR_KEEP_PREFIX_GAURD
-
-#ifdef LIBZATAR_STRIP_PREFIX
-
-#define DEFAULT_GROWTH_RATE Z_DEFAULT_GROWTH_RATE
-#define in_range z_in_range
-#define get_file_size z_get_file_size
-#define get_fmt_size z_get_fmt_size
-#define get_fmt_size_va z_get_fmt_size_va
-#define memdup z_memdup
-#define swap z_swap
-#define max z_max
-#define min z_min
-#define max3 z_max3
-#define min3 z_min3
-#define print_error z_print_error
-#define print_info z_print_info
-#define print_warning z_print_warning
-#define ensure_capacity z_da_ensure_capacity
-#define null_terminate z_da_null_terminate
-#define COLOR_RESET Z_COLOR_RESET
-#define COLOR_RED Z_COLOR_RED
-#define COLOR_GREEN Z_COLOR_GREEN
-#define COLOR_YELLOW Z_COLOR_YELLOW
-#define COLOR_BLUE Z_COLOR_BLUE
-#define COLOR_MAGENTA Z_COLOR_MAGENTA
-#define COLOR_CYAN Z_COLOR_CYAN
-#define COLOR_WHITE Z_COLOR_WHITE
-#define COLOR_GRAY Z_COLOR_GRAY
-#define COLOR_BOLD_RED Z_COLOR_BOLD_RED
-#define COLOR_BOLD_GREEN Z_COLOR_BOLD_GREEN
-#define COLOR_BOLD_YELLOW Z_COLOR_BOLD_YELLOW
-#define COLOR_BOLD_BLUE Z_COLOR_BOLD_BLUE
-#define COLOR_BOLD_MAGENTA Z_COLOR_BOLD_MAGENTA
-#define COLOR_BOLD_CYAN Z_COLOR_BOLD_CYAN
-#define COLOR_BOLD_WHITE Z_COLOR_BOLD_WHITE
-#define COLOR_BOLD_GRAY Z_COLOR_BOLD_GRAY
-#define KEY_EMPTY Z_KEY_EMPTY
-#define KEY_ARROW_LEFT Z_KEY_ARROW_LEFT
-#define KEY_ARROW_RIGHT Z_KEY_ARROW_RIGHT
-#define KEY_ARROW_UP Z_KEY_ARROW_UP
-#define KEY_ARROW_DOWN Z_KEY_ARROW_DOWN
-#define KEY_PAGE_UP Z_KEY_PAGE_UP
-#define KEY_PAGE_DOWN Z_KEY_PAGE_DOWN
-#define KEY_DELETE Z_KEY_DELETE
-#define KEY_HOME Z_KEY_HOME
-#define KEY_END Z_KEY_END
-#define CURSOR_STYLE Z_CURSOR_STYLE
-#define CURSOR_STYLE_BLOCK_STEADY Z_CURSOR_STYLE_BLOCK_STEADY
-#define CURSOR_STYLE_BLOCK_BLINKING Z_CURSOR_STYLE_BLOCK_BLINKING
-#define CURSOR_STYLE_UNDERLINE_BLINKING Z_CURSOR_STYLE_UNDERLINE_BLINKING
-#define CURSOR_STYLE_UNDERLINE_STEADY Z_CURSOR_STYLE_UNDERLINE_STEADY
-#define CURSOR_STYLE_BEAM_STEADY Z_CURSOR_STYLE_BEAM_STEADY
-#define CURSOR_STYLE_BEAM_BLINKING Z_CURSOR_STYLE_BEAM_BLINKING
-#define set_cursor_style z_set_cursor_style
-#define disable_line_wrap z_disable_line_wrap
-#define enbale_line_wrap z_enbale_line_wrap
-#define hide_cursor z_hide_cursor
-#define show_cursor z_show_cursor
-#define set_cursor_pos z_set_cursor_pos
-#define set_cursor_x z_set_cursor_x
-#define cursor_up z_cursor_up
-#define cursor_down z_cursor_down
-#define cursor_right z_cursor_right
-#define cursor_left z_cursor_left
-#define save_cursor_pos z_save_cursor_pos
-#define restore_cursor_pos z_restore_cursor_pos
-#define enter_alternative_screen z_enter_alternative_screen
-#define exit_alternative_screen z_exit_alternative_screen
-#define clear_line z_clear_line
-#define clear_screen z_clear_screen
-#define update_screen z_update_screen
-#define enable_raw_mode z_enable_raw_mode
-#define disable_raw_mode z_disable_raw_mode
-#define get_cursor_pos z_get_cursor_pos
-#define get_screen_size_by_cursor z_get_screen_size_by_cursor
-#define get_screen_size_by_ioctl z_get_screen_size_by_ioctl
-#define get_screen_size z_get_screen_size
-#define register_change_in_window_size z_register_change_in_window_size
-#define enable_full_buffering z_enable_full_buffering
-#define wait_for_byte z_wait_for_byte
-#define read_escape_key z_read_escape_key
-#define read_key z_read_key
-#define VECTOR_DECLARE Z_VECTOR_DECLARE
-#define VECTOR_IMPLEMENT Z_VECTOR_IMPLEMENT
-#define AVL_DECLARE Z_AVL_DECLARE
-#define AVL_IMPLEMENT Z_AVL_IMPLEMENT
-#define MAP_DECLARE Z_MAP_DECLARE
-#define MAP_IMPLEMENT Z_MAP_IMPLEMENT
-#define MAT_DECLARE Z_MAT_DECLARE
-#define MAT_AT Z_MAT_AT
-#define MAT_INIT Z_MAT_INIT
-#define MAT_RESIZE Z_MAT_RESIZE
-#define MAT_FREE Z_MAT_FREE
-#define String Z_String
-#define String_View Z_String_View
-#define String_Tokonizer Z_String_Tokonizer
-#define SV Z_SV
-#define STR_TO_SV Z_STR_TO_SV
-#define CSTR_TO_SV Z_CSTR_TO_SV
-#define EMPTY_SV Z_EMPTY_SV
-#define str_new z_str_new
-#define str_new_va z_str_new_va
-#define str_pushf z_str_pushf
-#define str_pushf_va z_str_pushf_va
-#define str_push z_str_push
-#define str_push_c z_str_push_c
-#define str_pop_c z_str_pop_c
-#define str_top_c z_str_top_c
-#define str_cmp z_str_cmp
-#define str_n_cmp z_str_n_cmp
-#define str_replace z_str_replace
-#define sv_to_cstr z_sv_to_cstr
-#define str_tok_init z_str_tok_init
-#define str_tok_next z_str_tok_next
-#define str_trim z_str_trim
-#define str_trim_cset z_str_trim_cset
-#define str_view_trim z_str_view_trim
-#define str_view_trim_cset z_str_view_trim_cset
-#define str_print z_str_print
-#define str_println z_str_println
-#define str_free z_str_free
-#define str_clear z_str_clear
-#define read_whole_file z_read_whole_file
-#define Pipe_Mode Z_Pipe_Mode
-#define Pipe_Mode_Read Z_Pipe_Mode_Read
-#define Pipe_Mode_Write Z_Pipe_Mode_Write
-#define get_path_extention z_get_path_extention
-#define get_path_basename z_get_path_basename
-#define get_home_path z_get_home_path
-#define expand_path z_expand_path
-#define compress_path z_compress_path
-#define is_extention_equal z_is_extention_equal
-#define dir_traverse z_dir_traverse
-#define is_dir z_is_dir
-#define is_regular_file z_is_regular_file
-#define is_path_exists z_is_path_exists
-#define write_file z_write_file
-#define append_file z_append_file
-#define read_file z_read_file
-#define redirect_fd z_redirect_fd
-#define popen2 z_popen2
-#define mkdir z_mkdir
-#define Cmd Z_Cmd
-#define should_rebuild z_should_rebuild
-#define should_rebuild_va z_should_rebuild_va
-#define rebuild_yourself z_rebuild_yourself
-#define cmd_init z_cmd_init
-#define cmd_append z_cmd_append
-#define cmd_append_va z_cmd_append_va
-#define cmd_run_async z_cmd_run_async
-#define run_async z_run_async
-#define cmd_free z_cmd_free
-#define cmd_clear z_cmd_clear
-
-#endif // LIBZATAR_STRIP_PREFIX
-#endif // LIBZATAR_STRIP_PREFIX_GAURD
 
 //   $       $       $       $       $       $       $        $        $
 //       $       $       $       $       $       $        $        $
