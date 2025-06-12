@@ -20,8 +20,7 @@ int build()
     z_cmd_init(&cmd);
     z_cmd_append(&cmd, "cc", "main.c", "-o", TARGET);
     z_cmd_append(&cmd, "-Wextra", "-Wall", "-pedantic");
-    z_cmd_append(&cmd, "-O0");
-    z_cmd_append(&cmd, "-g");
+    z_cmd_append(&cmd, "-O3");
 
     return z_cmd_run_async(&cmd);
 }
