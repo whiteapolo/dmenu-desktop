@@ -348,6 +348,7 @@ Z_String z_str_new_format_va(const char *fmt, va_list ap);
 Z_String z_str_new_from(Z_String_View s);
 void z_str_append_format(Z_String *s, const char *fmt, ...);
 void z_str_append_format_va(Z_String *s, const char *fmt, va_list ap);
+void z_str_reset_format(Z_String *s, const char *fmt, ...);
 void z_str_append_str(Z_String *dst, Z_String_View src);
 void z_str_append_char(Z_String *s, char c);
 char z_str_pop_char(Z_String *s);
@@ -1226,6 +1227,14 @@ Z_String z_str_new_from(Z_String_View s) {
 }
 
 void z_str_append_format(Z_String *s, const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  z_str_append_format_va(s, fmt, ap);
+  va_end(ap);
+}
+
+void z_str_reset_format(Z_String *s, const char *fmt, ...) {
+  z_str_clear(s);
   va_list ap;
   va_start(ap, fmt);
   z_str_append_format_va(s, fmt, ap);
