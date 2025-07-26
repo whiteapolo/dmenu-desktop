@@ -180,11 +180,8 @@ void write_string_to_file(void *key, void *data, void *arg) {
   fprintf((FILE *)arg, "%s\n", (char *)key);
 }
 
-int main(int argc, char **argv) {
-  (void)argc;
-
+void dmenu_desktop(char **argv) {
   FILE *pipe[2];
-  argv[0] = "dmenu"; // append any argument to dmenu
 
   // open dmenu in bidirectional pipe
   if (!z_popen2("dmenu", argv, pipe)) {
@@ -211,4 +208,9 @@ int main(int argc, char **argv) {
 
   fclose(pipe[Z_Pipe_Mode_Read]);
   z_map_free(&programs, free, free);
+}
+
+int main(int argc, char **argv) {
+  (void)argc;
+  dmenu_desktop(argv);
 }
