@@ -107,27 +107,25 @@ void process_desktop_file(const char *pathname, Z_Map *programs) {
 }
 
 void process_directory(const char *pathname, Z_Map *programs) {
-  DIR *dir = opendir(pathname);
 
-  if (dir == NULL) {
+  Z_Arena arena = {0};
+  Z_File_Paths files = {0};
+  Z_String full_path = {0};
+
+  if (!z_read_whole_dir(pathname, &files, &arena)) {
     return;
   }
 
-  struct dirent *entry;
-
-  Z_String full_path = {0};
-
-  while ((entry = readdir(dir)) != NULL) {
-    Z_String_View extention = z_get_path_extention(Z_CSTR(entry->d_name));
-    if (z_str_compare(extention, Z_CSTR("desktop")) == 0) {
-      z_str_clear(&full_path);
-      z_str_append_format(&full_path, "%s/%s", pathname, entry->d_name);
-      process_desktop_file(full_path.ptr, programs);
+  z_da_foreach(file, &files) {
+    if (z_sv_ends_with(Z_CSTR(*file), Z_CSTR(".desktop"))) {
+      z_str_reset_format(&full_path, "%s/%s", pathname, *file);
+      process_desktop_file(z_str_to_cstr(&full_path), programs);
     }
   }
 
   z_str_free(&full_path);
-  closedir(dir);
+  z_da_free(&files);
+  z_arena_free_all(&arena);
 }
 
 Z_Map process_directories(const char *dirs[]) {
