@@ -37,7 +37,7 @@ DesktopFile proccessDesktopFile(string pathname)
   enforce(nameMatch && execMatch, "name and exec was not found");
 
   auto name = nameMatch.captures[1].strip();
-  auto exec = execMatch.captures[1].strip().replaceAll(regex(`%\w+`), "");
+  auto exec = execMatch.captures[1].replaceAll(regex(`%\w+`), "").strip();
 
   return DesktopFile(name, exec);
 }
@@ -65,7 +65,7 @@ string[string] proccessDirs(string[] dirs)
   return programs;
 }
 
-void main(string[] args)
+int main(string[] args)
 {
   auto pipe = pipeProcess(["dmenu"] ~ args[1 .. $], Redirect.stdin | Redirect.stdout);
 
@@ -85,7 +85,7 @@ void main(string[] args)
   string selectedProgram = pipe.stdout.readln().strip();
 
   if (selectedProgram.empty) {
-    return;
+    return 1;
   }
 
   writeln("Selected program: ", selectedProgram);
@@ -93,7 +93,9 @@ void main(string[] args)
   if (auto exec = programs.get(selectedProgram, null)) {
     writeln("Running: '", exec, "'");
     system(exec.toStringz());
+    return 0;
   } else {
     writeln("program doesn't exitst: ", selectedProgram);
+    return 2;
   }
 }
