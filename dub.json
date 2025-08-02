@@ -1,0 +1,9 @@
+{
+	"authors": [
+		"white"
+	],
+	"copyright": "Copyright © 2025, white",
+	"description": "A minimal D application.",
+	"license": "proprietary",
+	"name": "dmenu-desktop"
+}
