@@ -68,12 +68,6 @@ string[string] proccessDirs(string[] dirs)
 int main(string[] args)
 {
   auto pipe = pipeProcess(["dmenu"] ~ args[1 .. $], Redirect.stdin | Redirect.stdout);
-
-  scope(exit) {
-    pipe.stdin.close();
-    pipe.stdout.close();
-  }
-
   auto programs = proccessDirs(desktopFileDirs);
 
   foreach (program; programs.keys) {
@@ -81,8 +75,8 @@ int main(string[] args)
   }
 
   pipe.stdin.close();
-
   string selectedProgram = pipe.stdout.readln().strip();
+  pipe.stdout.close();
 
   if (selectedProgram.empty) {
     return 1;
