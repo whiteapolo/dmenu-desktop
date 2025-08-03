@@ -27,22 +27,17 @@ string expandPath(string path)
   return path;
 }
 
-
 DesktopFile proccessDesktopFile(string pathname)
 {
-  auto execRegex = ctRegex!"Exec=([^\n]*)";
-  auto nameRegex = ctRegex!"Name=([^\n]*)";
-  auto fieldCodesRegex = ctRegex!"%/w+";
-
   string content = readText(pathname);
 
-  auto execMatch = matchFirst(content, execRegex);
-  auto nameMatch = matchFirst(content, nameRegex);
+  auto execMatch = matchFirst(content, regex(`Exec=([^\n]*)`));
+  auto nameMatch = matchFirst(content, regex(`Name=([^\n]*)`));
 
   enforce(nameMatch && execMatch, "name and exec was not found");
 
   auto name = nameMatch.captures[1].strip();
-  auto exec = execMatch.captures[1].replaceAll(fieldCodesRegex, "").strip();
+  auto exec = execMatch.captures[1].replaceAll(regex(`%\w+`), "").strip();
 
   return DesktopFile(name, exec);
 }
@@ -72,8 +67,6 @@ string[string] proccessDirs(string[] dirs)
 
 int main(string[] args)
 {
-  auto programs = proccessDirs(desktopFileDirs);
-  return 1;
   auto pipe = pipeProcess(["dmenu"] ~ args[1 .. $], Redirect.stdin | Redirect.stdout);
 
   scope(exit) {
@@ -81,6 +74,7 @@ int main(string[] args)
     pipe.stdout.close();
   }
 
+  auto programs = proccessDirs(desktopFileDirs);
 
   foreach (program; programs.keys) {
     pipe.stdin.writeln(program);
