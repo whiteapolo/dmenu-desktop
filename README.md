@@ -1,12 +1,11 @@
 ## quick start
 ```console
-$ cc build.c -o build
+$ rdmd --build-only build.d
 $ ./build
 $ ./dmenu-desktop
 ```
 
 ## install
 ```console
-$ cc build.c -o build
 $ sudo ./build install
 ```
