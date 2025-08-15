@@ -1,14 +1,22 @@
 import std.datetime : SysTime;
 import std.stdio : writeln, writefln;
-import std.file : getTimes, rename, remove, copy;
+import std.file : getTimes, rename, remove, copy, PreserveAttributes;
 import core.stdc.stdlib : exit;
 import std.process : wait, spawnProcess;
 import std.algorithm : any, map;
 import std.getopt;
+import std.path : stripExtension;
+import std.string : format;
+import std.array : join;
 
 string TARGET = "dmenu-desktop";
 string[] SRC = ["main.d"];
 string INSTALL_FOLDER = "/usr/local/bin";
+
+const string RESET = "\033[0m";
+const string GREEN = "\033[0;32m";
+const string YELLOW = "\033[0;33m";
+const string RED = "\033[0;31m";
 
 SysTime getModificationTime(string fileName)
 {
@@ -23,76 +31,82 @@ bool should_rebuild(string binary, string[] sources)
   try {
     SysTime binaryModTime = getModificationTime(binary);
     auto srcModTime = sources.map!(src => getModificationTime(src));
-
     return any!(a => a > binaryModTime)(srcModTime);
-  }
-  catch (Exception e) {
+  } catch (Exception e) {
     return true;
   }
 }
 
+void logInfo(T)(string action, T description)
+{
+  writefln("[%s%s%s]: %s", GREEN, action, RESET, description);
+}
+
+void logWarning(T)(T description)
+{
+  writefln("[%sWARNING%s]: %s", YELLOW, RESET, description);
+}
+
+void logError(T)(T description)
+{
+  writefln("[%sERROR%s]: %s", RED, RESET, description);
+}
+
 int run(string[] args)
 {
-  writeln("[CMD]: ", args);
+  logInfo("CMD", join(args, " "));
   auto status = wait(spawnProcess(args));
 
   if (status) {
-    writeln("[ERROR]: exited abnormally with code ", status);
+    logError(format("exited %sabnormally%s with code %s%s%s", RED, RESET, RED, status, RESET));
   }
 
   return status;
 }
 
-int removeLog(string file)
+int logAction(T)(string action, T description, void delegate() fn)
 {
-  writeln("[REMOVE]: ", file);
+  logInfo(action, description);
 
   try {
-    remove(file);
+    fn();
   } catch (Exception e) {
-    writeln("[ERROR]: ", e.msg);
+    logError(e.msg);
     return 1;
   }
 
   return 0;
+}
+
+int removeLog(string file)
+{
+  return logAction("REMOVE", file, () => remove(file));
 }
 
 int renameLog(string src, string target)
 {
-  writefln("[RENAME]: %s -> %s", src, target);
-
-  try {
-    rename(src, target);
-  } catch (Exception e) {
-    writeln("[ERROR]: ", e.msg);
-    return 1;
-  }
-
-  return 0;
+  return logAction("RENAME", src ~ " -> " ~ target, () => rename(src, target));
 }
 
 int copyLog(string src, string target)
 {
-  writefln("[COPY]: %s -> %s", src, target);
-
-  try {
-    copy(src, target);
-  } catch (Exception e) {
-    writeln("[ERROR]: ", e.msg);
-    return 1;
-  }
-
-  return 0;
+  return logAction(
+      "COPY", src ~ " -> " ~ target,
+      () => copy(src, target, PreserveAttributes.yes
+  ));
 }
 
-void rebuild_youself(string binary)
+void rebuild_youself(string[] args)
 {
-    if (!should_rebuild(binary, [__FILE__])) {
+    string binary = stripExtension(__FILE__);
+    string file = __FILE__;
+
+    if (!should_rebuild(binary, [file])) {
         return;
     }
 
     renameLog(binary, binary ~ ".old");
-    auto status = run(["rdmd", "--build-only", __FILE__, "-of=" ~ binary]);
+    auto status = run(["rdmd", "--build-only", file, "-of=" ~ binary]);
 
     if (status != 0) {
         writeln("[ERROR]: compilation failed");
@@ -102,7 +116,7 @@ void rebuild_youself(string binary)
 
     removeLog(binary ~ ".old");
 
-    run(["./" ~ binary]);
+    run(["./" ~ binary] ~ args[1..$]);
     exit(0);
 }
 
@@ -117,11 +131,7 @@ int build()
 
 int clean()
 {
-  try {
-    remove(TARGET);
-  } catch (Exception e) {}
-
-  return 0;
+  return removeLog(TARGET);
 }
 
 int install()
@@ -132,24 +142,17 @@ int install()
     return status;
   }
 
-  return run(["cp", "-p", TARGET, INSTALL_FOLDER ~ "/" ~ TARGET]);
+  return copyLog(TARGET, INSTALL_FOLDER ~ "/" ~ TARGET);
 }
 
 int uninstall()
 {
-  try {
-    removeLog(INSTALL_FOLDER ~ "/" ~ TARGET);
-  } catch (Exception e) {
-    writeln(e.msg);
-    return 1;
-  }
-
-  return 0;
+  return removeLog(INSTALL_FOLDER ~ "/" ~ TARGET);
 }
 
 int main(string[] args)
 {
-  rebuild_youself("build");
+  rebuild_youself(args);
 
   if (args.length == 1) {
     return build();
