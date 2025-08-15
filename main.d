@@ -8,14 +8,14 @@ import core.stdc.stdlib;
 import std.exception;
 import std.path : expandTilde;
 
-struct DesktopFile
-{
+struct DesktopFile {
     string name;
     string exec;
 }
 
 string[] desktopFileDirs = [
-    "/usr/share/applications", "~/.local/share/applications",
+    "/usr/share/applications",
+    "~/.local/share/applications",
     "/var/lib/flatpak/exports/share/applications",
 ];
 
@@ -36,18 +36,12 @@ DesktopFile proccessDesktopFile(string pathname)
 
 void proccessDir(string pathname, ref string[string] programs)
 {
-    foreach (de; dirEntries(expandTilde(pathname), SpanMode.shallow))
-    {
-        if (de.isFile && de.name.endsWith(".desktop"))
-        {
-            try
-            {
+    foreach (de; dirEntries(expandTilde(pathname), SpanMode.shallow)) {
+        if (de.isFile && de.name.endsWith(".desktop")) {
+            try {
                 DesktopFile file = proccessDesktopFile(de.name);
                 programs[file.name] = file.exec;
-            }
-            catch (Exception e)
-            {
-            }
+            } catch (Exception e) {}
         }
     }
 }
@@ -56,8 +50,7 @@ string[string] proccessDirs(string[] dirs)
 {
     string[string] programs;
 
-    foreach (dir; desktopFileDirs)
-    {
+    foreach (dir; desktopFileDirs) {
         proccessDir(dir, programs);
     }
 
@@ -69,8 +62,7 @@ int main(string[] args)
     auto pipe = pipeProcess(["dmenu"] ~ args[1 .. $], Redirect.stdin | Redirect.stdout);
     auto programs = proccessDirs(desktopFileDirs);
 
-    foreach (program; programs.keys)
-    {
+    foreach (program; programs.keys) {
         pipe.stdin.writeln(program);
     }
 
@@ -78,21 +70,17 @@ int main(string[] args)
     string selectedProgram = pipe.stdout.readln().strip();
     pipe.stdout.close();
 
-    if (selectedProgram.empty)
-    {
+    if (selectedProgram.empty) {
         return 1;
     }
 
     writeln("Selected program: ", selectedProgram);
 
-    if (auto exec = programs.get(selectedProgram, null))
-    {
+    if (auto exec = programs.get(selectedProgram, null)) {
         writeln("Running: '", exec, "'");
         system(exec.toStringz());
         return 0;
-    }
-    else
-    {
+    } else {
         writeln("program doesn't exitst: ", selectedProgram);
         return 2;
     }
