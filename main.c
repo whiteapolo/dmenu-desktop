@@ -2,130 +2,132 @@
 #include "./zlib/include/z_string.h"
 #include "./zlib/include/z_hash_table.h"
 #include "./zlib/include/z_heap.h"
+#include "zlib/include/z_path.h"
 #include "zlib/include/z_scanner.h"
 #include <stdio.h>
 
-const char *DESKTOP_FILES_SEARCH_PATH[] = {
-        "/usr/share/applications",
-        "~/.local/share/applications",
-        "/var/lib/flatpak/exports/share/applications",
-        NULL,
-};
-
 typedef struct {
-        bool ok;
-        Z_String_View name;
-        Z_String_View exec;
+    bool ok;
+    Z_String_View name;
+    Z_String_View exec;
 } Parse_Desktop_File_Result;
+
+Parse_Desktop_File_Result parse_desktop_file_result_error()
+{
+    Parse_Desktop_File_Result result = {
+        .ok = false,
+    };
+
+    return result;
+}
+
+Parse_Desktop_File_Result parse_desktop_file_result_ok(Z_String_View name, Z_String_View exec)
+{
+    Parse_Desktop_File_Result result = {
+        .ok = true,
+        .name = name,
+        .exec = exec,
+    };
+
+    return result;
+}
 
 Parse_Desktop_File_Result parse_desktop_file(Z_String_View content)
 {
-        Z_Heap_Auto heap = {0};
-        Z_String_View_Array lines = z_sv_split(&heap, content, z_sv("\n"));
-        Z_String_View name = z_sv("");
-        Z_String_View exec = z_sv("");
+    Z_Heap_Auto heap = {0};
+    Z_String_View_Array lines = z_sv_split(&heap, content, z_sv("\n"));
+    Z_String_View name = z_sv("");
+    Z_String_View exec = z_sv("");
 
-        Z_Scanner scanner = z_scanner_new(content);
-
-        // while (!z_scanner_is_at_end(&scanner)) {
-        //         z_scanner_advance_until(&scanner, '\n');
-        //         Z_String_View line = z_scanner_capture(&scanner);
-
-        //         if (z_sv_like(line, z_sv("Name=%"))) {
-        //                 name = z_sv_advance(line, 5);
-        //         } else if (z_sv_like(line, z_sv("Exec=%"))) {
-        //                 exec = z_sv_advance(line, 5);
-        //         }
-
-        //         z_scanner_advance(&scanner, 1);
-        //         z_scanner_reset_mark(&scanner);
-        // }
-
-        for (size_t i = 0; i < lines.length; i++) {
-                if (z_sv_like(lines.ptr[i], z_sv("Name=%"))) {
-                        name = z_sv_advance(lines.ptr[i], 5);
-                } else if (z_sv_like(lines.ptr[i], z_sv("Exec=%"))) {
-                        exec = z_sv_advance(lines.ptr[i], 5);
-                }
+    for (size_t i = 0; i < lines.length; i++) {
+        if (z_sv_like(lines.ptr[i], z_sv("Name=%"))) {
+            name = z_sv_split_part(lines.ptr[i], z_sv("="), 1);
+        } else if (z_sv_like(lines.ptr[i], z_sv("Exec=%"))) {
+            exec = z_sv_split_part(lines.ptr[i], z_sv("="), 1);
         }
+    }
 
-        if (name.length > 0 && exec.length > 0) {
-                Parse_Desktop_File_Result result = { .ok = true, .name = name, .exec = exec };
-                return result;
-        }
+    if (name.length > 0 && exec.length > 0) {
+        return parse_desktop_file_result_ok(name, exec);
+    }
 
-        Parse_Desktop_File_Result result = { .ok = false };
-
-        return result;
+    return parse_desktop_file_result_error();
 }
 
 void proccess_desktop_file(Z_Heap *heap, const char *pathname, Z_Hash_Table *table)
 {
-        Z_Heap_Auto scratch = {0};
-        Z_Maybe_String result =  z_read_file(&scratch, pathname);
+    Z_Heap_Auto scratch = {0};
+    Z_Maybe_String result =  z_read_file(&scratch, pathname);
 
-        if (!result.ok) {
-                return;
-        }
+    if (!result.ok) {
+        return;
+    }
 
-        Parse_Desktop_File_Result parse_result = parse_desktop_file(z_sv(result.value));
+    Parse_Desktop_File_Result parse_result = parse_desktop_file(z_sv(result.value));
 
-        if (!parse_result.ok) {
-                return;
-        }
+    if (!parse_result.ok) {
+        return;
+    }
 
-        z_hash_table_put(table, z_sv_to_cstr(heap, parse_result.name), z_sv_to_cstr(heap, parse_result.exec));
+    z_hash_table_put(table, z_sv_to_cstr(heap, parse_result.name), z_sv_to_cstr(heap, parse_result.exec));
 }
 
-bool is_desktop_file(Z_String_View pathname)
+Z_String_Array map_directories_to_files(Z_Heap *heap, Z_String_Array directories)
 {
-        bool is_hidden = z_sv_starts_with(pathname, z_sv("."));
-        bool is_desktop_extension = z_sv_ends_with(pathname, z_sv(".desktop"));
+    Z_String_Array files = z_array_new(heap, Z_String_Array);
 
-        return !is_hidden && is_desktop_extension;
+    for (size_t i = 0; i < directories.length; i++) {
+        Z_Heap scratch = {0};
+        Z_Maybe_String_Array result = z_read_directory(&scratch, directories.ptr[i].ptr);
+
+        if (result.ok) {
+            Z_String_Array files_in_dir = result.value;
+            z_array_map(&files_in_dir, Z_String file, z_str_new(heap, "%s/%s", directories.ptr[i].ptr, file.ptr));
+            z_array_push_array(&files, &files_in_dir);
+        }
+
+        z_heap_free_all(&scratch);
+    }
+
+    return files;
 }
 
-void proccess_directory(Z_Heap *heap, const char *pathname, Z_Hash_Table *table)
+bool is_desktop_file(Z_String_View path)
 {
-        Z_Heap_Auto scratch = {0};
-        Z_Maybe_String_Array result = z_read_directory(&scratch, pathname);
-
-        if (!result.ok) {
-                return;
-        }
-
-        Z_String_Array files = result.value;
-        Z_String full_path = z_str_new(&scratch, "");
-
-        for (size_t i = 0; i < files.length; i++) {
-                if (is_desktop_file(z_sv(files.ptr[i]))) {
-                        z_str_append_format(&full_path, "%s/%s", pathname, files.ptr[i].ptr);
-                        proccess_desktop_file(heap, full_path.ptr, table);
-                        z_str_clear(&full_path);
-                }
-        }
+    return z_sv_ends_with(path, z_sv(".desktop"));
 }
 
-void proccess_directories(Z_Heap *heap, Z_Hash_Table *table)
+Z_String_Array get_desktop_files(Z_Heap *heap)
 {
-        for (const char **curr = DESKTOP_FILES_SEARCH_PATH; *curr; curr++) {
-                proccess_directory(heap, *curr, table);
-        }
-}
+    const char *DESKTOP_FILES_SEARCH_PATH[] = {
+        "/usr/share/applications",
+        "~/.local/share/applications",
+        "/var/lib/flatpak/exports/share/applications",
+        NULL,
+    };
 
+    Z_String_Array paths = z_str_array_from(heap, DESKTOP_FILES_SEARCH_PATH);
+    Z_String_Array files = map_directories_to_files(heap, paths);
+    z_array_filter(&files, Z_String file, is_desktop_file(z_sv(file)));
+
+    return files;
+}
 
 int main()
 {
-        Z_Heap_Auto heap = {0};
-        Z_Hash_Table table = z_hash_table_new(&heap, z_str_equal, z_str_hash);
-        proccess_directories(&heap, &table);
-        return;
+    Z_Heap_Auto heap = {0};
+    Z_Hash_Table table = z_hash_table_new(&heap, z_str_equal, z_str_hash);
+    Z_String_Array desktop_files = get_desktop_files(&heap);
 
-        Z_Pair_Array pairs = z_hash_table_to_array(&heap, &table);
+    for (size_t i = 0; i < desktop_files.length; i++) {
+        proccess_desktop_file(&heap, desktop_files.ptr[i].ptr, &table);
+    }
 
-        for (size_t i = 0; i < pairs.length; i++) {
-                printf("\t'%s': '%s'\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].key);
-        }
+    Z_Pair_Array pairs = z_hash_table_to_array(&heap, &table);
 
-        return 0;
+    for (size_t i = 0; i < pairs.length; i++) {
+        printf("%s: %40s\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].key);
+    }
+
+    return 0;
 }

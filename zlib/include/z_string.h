@@ -39,6 +39,9 @@ void z_str_clear(Z_String *s);
 
 Z_String z_str_join(Z_Heap *heap, const Z_String_Array *array, Z_String_View delimiter);
 Z_String_View_Array z_sv_split(Z_Heap *heap, Z_String_View s, Z_String_View delimiter);
+Z_String_View z_sv_split_part(Z_String_View s, Z_String_View delimiter, size_t index);
+Z_String_Array z_str_array_from(Z_Heap *heap, const char **s);
+Z_String_Array z_str_array_filter(Z_String_Array array, bool callback(Z_String));
 
 void z_str_trim(Z_String *s);
 void z_str_trim_cset(Z_String *s, Z_String_View cset);
@@ -54,6 +57,7 @@ Z_String_View z_sv_from_cstr(const char *s);
 #define z_sv(s) _Generic((s),                    \
                 Z_String   : z_sv_from_str,      \
                 Z_String * : z_sv_from_str_ptr,  \
+                const char * : z_sv_from_cstr,  \
                 char *     : z_sv_from_cstr)(s)
 
 Z_String_View z_sv_advance(Z_String_View s, size_t offset);

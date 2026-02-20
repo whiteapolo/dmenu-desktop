@@ -53,4 +53,30 @@ typedef struct {                                 \
     : ((array_ptr)->capacity * Z_BUFFER_GROWTH_FACTOR)         \
 )
 
+#define z_array_filter(array_ptr, type_and_name, bool_expression) \
+    do {                                                          \
+        size_t _i = 0;                                            \
+        size_t _j = 0;                                            \
+                                                                  \
+        while (_i < (array_ptr)->length) {                        \
+            type_and_name = (array_ptr)->ptr[_i];                 \
+                                                                  \
+            if (bool_expression) {                                \
+                (array_ptr)->ptr[_j] = (array_ptr)->ptr[_i];      \
+                _j++;                                             \
+            }                                                     \
+                                                                  \
+            _i++;                                                 \
+        }                                                         \
+        (array_ptr)->length = _j;                                 \
+    } while (0)
+
+#define z_array_map(array_ptr, type_and_name, map_expression) \
+    do {                                                      \
+        for (size_t _i = 0; _i < (array_ptr)->length; _i++) { \
+            type_and_name = (array_ptr)->ptr[_i];             \
+            (array_ptr)->ptr[_i] = (map_expression);          \
+        }                                                     \
+    } while (0)
+
 #endif
