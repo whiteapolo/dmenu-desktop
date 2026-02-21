@@ -75,9 +75,9 @@ void proccess_desktop_file(Z_Heap *heap, const char *pathname, Z_Hash_Table *tab
 Z_String_Array map_directories_to_files(Z_Heap *heap, Z_String_Array directories)
 {
     Z_String_Array files = z_array_new(heap, Z_String_Array);
+    Z_Heap_Auto scratch = {0};
 
     for (size_t i = 0; i < directories.length; i++) {
-        Z_Heap scratch = {0};
         Z_Maybe_String_Array result = z_read_directory(&scratch, directories.ptr[i].ptr);
 
         if (result.ok) {
@@ -86,7 +86,7 @@ Z_String_Array map_directories_to_files(Z_Heap *heap, Z_String_Array directories
             z_array_push_array(&files, &files_in_dir);
         }
 
-        z_heap_free_all(&scratch);
+        z_heap_reset(&scratch);
     }
 
     return files;
@@ -114,7 +114,7 @@ Z_String_Array get_desktop_files(Z_Heap *heap)
 }
 
 int main()
-{
+<%
     Z_Heap_Auto heap = {0};
     Z_Hash_Table table = z_hash_table_new(&heap, z_str_equal, z_str_hash);
     Z_String_Array desktop_files = get_desktop_files(&heap);
