@@ -72,12 +72,12 @@ void proccess_desktop_file(Z_Heap *heap, const char *pathname, Z_Hash_Table *tab
     z_hash_table_put(table, z_sv_to_cstr(heap, parse_result.name), z_sv_to_cstr(heap, parse_result.exec));
 }
 
-Z_String_Array map_directories_to_files(Z_Heap *heap, Z_String_Array directories)
+Z_String_Array map_directories_to_files(Z_Heap *heap, const Z_String_Array *directories)
 {
     Z_String_Array files = z_array_new(heap, Z_String_Array);
     Z_Heap_Auto scratch = {0};
 
-    for (size_t i = 0; i < directories.length; i++) {
+    for (size_t i = 0; i < directories->length; i++) {
         Z_Maybe_String_Array result = z_read_directory(&scratch, directories.ptr[i].ptr);
 
         if (result.ok) {
@@ -99,14 +99,11 @@ bool is_desktop_file(Z_String_View path)
 
 Z_String_Array get_desktop_files(Z_Heap *heap)
 {
-    const char *DESKTOP_FILES_SEARCH_PATH[] = {
-        "/usr/share/applications",
-        "~/.local/share/applications",
-        "/var/lib/flatpak/exports/share/applications",
-        NULL,
-    };
+    Z_String_Array paths = z_array_new(heap, Z_String_Array);
+    z_array_push(&paths, z_str_new(heap, "/usr/share/applications"));
+    z_array_push(&paths, z_str_new(heap, "~/.local/share/applications"));
+    z_array_push(&paths, z_str_new(heap, "/var/lib/flatpak/exports/share/applications"));
 
-    Z_String_Array paths = z_str_array_from(heap, DESKTOP_FILES_SEARCH_PATH);
     Z_String_Array files = map_directories_to_files(heap, paths);
     z_array_filter(&files, Z_String file, is_desktop_file(z_sv(file)));
 
@@ -114,7 +111,7 @@ Z_String_Array get_desktop_files(Z_Heap *heap)
 }
 
 int main()
-<%
+{
     Z_Heap_Auto heap = {0};
     Z_Hash_Table table = z_hash_table_new(&heap, z_str_equal, z_str_hash);
     Z_String_Array desktop_files = get_desktop_files(&heap);
