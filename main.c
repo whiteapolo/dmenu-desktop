@@ -1,95 +1,55 @@
+#include <stdio.h>
+#include <dirent.h>
 #include "./zlib/include/z_file.h"
 #include "./zlib/include/z_string.h"
 #include "./zlib/include/z_hash_table.h"
 #include "./zlib/include/z_heap.h"
-#include "zlib/include/z_path.h"
-#include "zlib/include/z_scanner.h"
-#include <stdio.h>
+#include "./zlib/include/z_path.h"
+#include "./zlib/include/z_scanner.h"
+
+const char *DESKTOP_FILES_DIRECTORIES[] = {
+    "/usr/share/applications",
+    "~/.local/share/applications",
+    "/var/lib/flatpak/exports/share/applications",
+    NULL,
+};
 
 typedef struct {
-    bool ok;
-    Z_String_View name;
-    Z_String_View exec;
-} Parse_Desktop_File_Result;
+    Z_Heap *heap;
+    Z_Hash_Table *table;
+} Parse_Desktop_File_State;
 
-Parse_Desktop_File_Result parse_desktop_file_result_error()
+bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
 {
-    Parse_Desktop_File_Result result = {
-        .ok = false,
-    };
+    Z_Heap_Auto scratch = {0};
+    FILE *fp = fopen(pathname, "r");
 
-    return result;
-}
+    if (fp == NULL) {
+        return false;
+    }
 
-Parse_Desktop_File_Result parse_desktop_file_result_ok(Z_String_View name, Z_String_View exec)
-{
-    Parse_Desktop_File_Result result = {
-        .ok = true,
-        .name = name,
-        .exec = exec,
-    };
-
-    return result;
-}
-
-Parse_Desktop_File_Result parse_desktop_file(Z_String_View content)
-{
-    Z_Heap_Auto heap = {0};
-    Z_String_View_Array lines = z_sv_split(&heap, content, z_sv("\n"));
+    Z_String line = z_str_new(&scratch, "");
     Z_String_View name = z_sv("");
     Z_String_View exec = z_sv("");
 
-    for (size_t i = 0; i < lines.length; i++) {
-        if (z_sv_like(lines.ptr[i], z_sv("Name=%"))) {
-            name = z_sv_split_part(lines.ptr[i], z_sv("="), 1);
-        } else if (z_sv_like(lines.ptr[i], z_sv("Exec=%"))) {
-            exec = z_sv_split_part(lines.ptr[i], z_sv("="), 1);
+    while(z_file_read_line(fp, &line) && (name.length == 0 || exec.length == 0)) {
+        Z_String_View line_sv = z_sv(line);
+
+        if (z_sv_like(line_sv, z_sv("Name=%"))) {
+            name = z_sv_split_part(line_sv, z_sv("="), 1);
+        } else if (z_sv_like(line_sv, z_sv("Exec=%"))) {
+            exec = z_sv_split_part(line_sv, z_sv("="), 1);
         }
+
+        z_str_clear(&line);
     }
 
     if (name.length > 0 && exec.length > 0) {
-        return parse_desktop_file_result_ok(name, exec);
+        z_hash_table_put(state->table, z_sv_to_cstr(state->heap, name), z_sv_to_cstr(state->heap, exec), NULL);
     }
 
-    return parse_desktop_file_result_error();
-}
-
-void proccess_desktop_file(Z_Heap *heap, const char *pathname, Z_Hash_Table *table)
-{
-    Z_Heap_Auto scratch = {0};
-    Z_Maybe_String result =  z_read_file(&scratch, pathname);
-
-    if (!result.ok) {
-        return;
-    }
-
-    Parse_Desktop_File_Result parse_result = parse_desktop_file(z_sv(result.value));
-
-    if (!parse_result.ok) {
-        return;
-    }
-
-    z_hash_table_put(table, z_sv_to_cstr(heap, parse_result.name), z_sv_to_cstr(heap, parse_result.exec));
-}
-
-Z_String_Array map_directories_to_files(Z_Heap *heap, const Z_String_Array *directories)
-{
-    Z_String_Array files = z_array_new(heap, Z_String_Array);
-    Z_Heap_Auto scratch = {0};
-
-    for (size_t i = 0; i < directories->length; i++) {
-        Z_Maybe_String_Array result = z_read_directory(&scratch, directories.ptr[i].ptr);
-
-        if (result.ok) {
-            Z_String_Array files_in_dir = result.value;
-            z_array_map(&files_in_dir, Z_String file, z_str_new(heap, "%s/%s", directories.ptr[i].ptr, file.ptr));
-            z_array_push_array(&files, &files_in_dir);
-        }
-
-        z_heap_reset(&scratch);
-    }
-
-    return files;
+    fclose(fp);
+    return true;
 }
 
 bool is_desktop_file(Z_String_View path)
@@ -97,33 +57,62 @@ bool is_desktop_file(Z_String_View path)
     return z_sv_ends_with(path, z_sv(".desktop"));
 }
 
-Z_String_Array get_desktop_files(Z_Heap *heap)
+bool proccess_directory(Parse_Desktop_File_State *state, const char *pathname)
 {
-    Z_String_Array paths = z_array_new(heap, Z_String_Array);
-    z_array_push(&paths, z_str_new(heap, "/usr/share/applications"));
-    z_array_push(&paths, z_str_new(heap, "~/.local/share/applications"));
-    z_array_push(&paths, z_str_new(heap, "/var/lib/flatpak/exports/share/applications"));
+    Z_Heap_Auto scratch = {0};
+    DIR *dir = opendir(pathname);
 
-    Z_String_Array files = map_directories_to_files(heap, paths);
-    z_array_filter(&files, Z_String file, is_desktop_file(z_sv(file)));
+    if (!dir) {
+        perror("Cant open dir");
+        return false;
+    }
 
-    return files;
+    Z_String full_path = z_str_new(&scratch, "");
+    struct dirent *entry;
+
+    while ((entry = readdir(dir))) {
+        z_str_append_format(&full_path, "%s/%s", pathname, entry->d_name);
+
+        if (is_desktop_file(z_sv(full_path))) {
+            proccess_desktop_file(state, z_str_to_cstr(full_path));
+        }
+
+        z_str_clear(&full_path);
+    }
+
+    closedir(dir);
+
+    return true;
+}
+
+void proccess_directories(Parse_Desktop_File_State *state)
+{
+    Z_Heap_Auto scratch = {0};
+    Z_String full_path = z_str_new(&scratch, "");
+
+    for (const char **dir = DESKTOP_FILES_DIRECTORIES; *dir != NULL; dir++) {
+        z_expand_tilde(z_sv(*dir), &full_path);
+        proccess_directory(state, z_str_to_cstr(full_path));
+        z_str_clear(&full_path);
+    }
 }
 
 int main()
 {
     Z_Heap_Auto heap = {0};
     Z_Hash_Table table = z_hash_table_new(&heap, z_str_equal, z_str_hash);
-    Z_String_Array desktop_files = get_desktop_files(&heap);
 
-    for (size_t i = 0; i < desktop_files.length; i++) {
-        proccess_desktop_file(&heap, desktop_files.ptr[i].ptr, &table);
-    }
+    Parse_Desktop_File_State state = {
+        .heap = &heap,
+        .table = &table,
+    };
+
+    proccess_directories(&state);
 
     Z_Pair_Array pairs = z_hash_table_to_array(&heap, &table);
 
     for (size_t i = 0; i < pairs.length; i++) {
-        printf("%s: %40s\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].key);
+        printf("%s: %s\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].key);
     }
 
     return 0;

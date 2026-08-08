@@ -1,26 +1,28 @@
 #include <z_path.h>
 #include <z_env.h>
 
-Z_String z_expand_tilde(Z_Heap *heap, Z_String_View pathname)
+bool z_expand_tilde(Z_String_View pathname, Z_String *out)
 {
-  if (z_sv_starts_with(pathname, z_sv_from_cstr("~"))) {
-    Z_String expanded = z_str_new(heap, "%s", z_try_get_env("HOME", "."));
-    z_str_append_str(&expanded, z_sv_advance(pathname, 1));
-    return expanded;
-  }
+    if (!z_sv_starts_with(pathname, z_sv("~"))) {
+        z_str_append_str(out, pathname);
+        return false;
+    }
 
-  return z_str_new_from_sv(heap, pathname);
+    z_str_append_cstr(out, z_try_get_env("HOME", "."));
+    z_str_append_str(out, z_sv_advance(pathname, 1));
+    return true;
 }
 
-Z_String z_compress_tilde(Z_Heap *heap, Z_String_View pathname)
+bool z_compress_tilde(Z_String_View pathname, Z_String *out)
 {
-  const char *home = z_try_get_env("HOME", NULL);
+    const char *home = z_try_get_env("HOME", ".");
 
-  if (home && z_sv_starts_with(pathname, z_sv_from_cstr(home))) {
-    Z_String compressed = z_str_new(heap, "~");
-    z_str_append_str(&compressed, z_sv_advance(pathname, strlen(home)));
-    return compressed;
-  }
-
-  return z_str_new_from_sv(heap, pathname);
+    if (!z_sv_starts_with(pathname, z_sv(home))) {
+        z_str_append_str(out, pathname);
+        return false;
+    }
+    
+    z_str_append_cstr(out, "~");
+    z_str_append_str(out, z_sv_advance(pathname, strlen(home)));
+    return true;
 }

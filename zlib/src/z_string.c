@@ -58,7 +58,7 @@ char *z_str_to_cstr(Z_String s)
 
 void z_str_append_cstr(Z_String *s, const char *cstr)
 {
-    z_str_append_str(s, z_sv_from_cstr(cstr));
+    z_str_append_str(s, z_sv(cstr));
 }
 
 void z_str_append_format(Z_String *s, const char *format, ...)
@@ -97,6 +97,25 @@ void z_str_append_char(Z_String *s, char c)
     z_array_zero_terminate(s);
 }
 
+bool z_str_append_file(Z_String *s, const char *pathname)
+{
+    FILE *fp = fopen(pathname, "r");
+
+    if (fp == NULL) {
+        return false;
+    }
+
+    size_t file_size = z__get_file_size(fp);
+
+    z_array_ensure_capacity(s, s->length + file_size);
+    s->length += fread(s->ptr + s->length, 1, file_size, fp);
+    z_array_zero_terminate(s);
+    fclose(fp);
+
+    return true;
+}
+
+
 void z_str_prepend_format(Z_String *s, const char *format, ...)
 {
     va_list args;
@@ -126,6 +145,7 @@ void z_str_prepend_char(Z_String *s, char c)
 
 char z_str_pop_char(Z_String *s)
 {
+    assert(s->length > 0);
     char c = z_array_pop(s);
     z_array_zero_terminate(s);
     return c;
@@ -152,62 +172,49 @@ void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement)
     z_str_append_format(s, "%s", tmp.ptr);
 }
 
-Z_String z_str_join(Z_Heap *heap, const Z_String_Array *array, Z_String_View delimiter)
+Z_Sv_Split_Iterator z_sv_split(Z_String_View s, Z_String_View delimeter)
 {
-    if (array->length == 0) {
-        return z_str_new(heap, "");
-    }
+    Z_Sv_Split_Iterator iter = {
+        .s = s,
+        .delimeter = delimeter,
+        .current = 0,
+        .is_done = false,
+    };
 
-    Z_String result = z_str_new(heap, "");
-
-    for (size_t i = 0; i < array->length - 1; i++) {
-        z_str_append_str(&result, z_sv_from_str(array->ptr[i]));
-        z_str_append_str(&result, delimiter);
-    }
-
-    z_str_append_str(&result, z_sv_from_str(z_array_peek(array)));
-    return result;
+    return iter;
 }
 
-Z_String_View_Array z_sv_split(Z_Heap *heap, Z_String_View s, Z_String_View delimiter)
+bool z_sv_split_next(Z_Sv_Split_Iterator *iterator, Z_String_View *slice)
 {
-    Z_String_View_Array result = z_array_new(heap, Z_String_View_Array);
-
-    if (delimiter.length == 0) {
-        return result;
+    if (iterator->current > iterator->s.length) {
+        return false;
     }
 
-    ssize_t offset = 0;
-    ssize_t length = 0;
+    Z_String_View small_world = z_sv_advance(iterator->s, iterator->current);
+    ssize_t next = z_sv_find_index(small_world, iterator->delimeter);
 
-    while ((length = z_sv_find_index(z_sv_advance(s, offset), delimiter)) != -1) {
-        Z_String_View slice = z_sv_substring(s, offset, offset + length);
-        z_array_push(&result, slice);
-        offset += length + delimiter.length;
+    if (next == -1) {
+        iterator->current += small_world.length + 1;
+        *slice = small_world;
+        return true;
     }
 
-    z_array_push(&result, z_sv_substring(s, offset, s.length));
-
-    return result;
-}
-
-Z_String_Array z_str_array_from(Z_Heap *heap, const char **s)
-{
-    Z_String_Array array = z_array_new(heap, Z_String_Array);
-    const char **current = s;
-
-    while (*current) {
-        z_array_push(&array, z_str_new(heap, "%s", *current));
-        current++;
-    }
-
-    return array;
+    iterator->current += next + iterator->delimeter.length;
+    *slice = z_sv_substring(small_world, 0, next);
+    return true;
 }
 
 Z_String_View z_sv_split_part(Z_String_View s, Z_String_View delimiter, size_t index)
 {
-    Z_Heap_Auto heap = {0};
-    return z_sv_split(&heap, s, delimiter).ptr[index];
+    Z_Sv_Split_Iterator iter = z_sv_split(s, delimiter);
+    Z_String_View slice;
+
+    for (size_t i = 0; i < index; i++) {
+        z_sv_split_next(&iter, &slice);
+    }
+
+    assert(z_sv_split_next(&iter, &slice) && "index of split is overreaching");
+    return slice;
 }
 
 Z_String_View z_sv_from_str_ptr(const Z_String *s)
@@ -342,15 +349,11 @@ int z_sv_compare_n(Z_String_View a, Z_String_View b, size_t n)
 {
     int compare = memcmp(a.ptr, b.ptr, z__min_size_t(n, z__min_size_t(a.length, b.length)));
 
-    if (compare != 0) {
-        return compare;
-    }
-
-    if (z__min_size_t(a.length, b.length) < n) {
+    if (compare == 0) {
         return z__size_t_to_int(a.length) - z__size_t_to_int(b.length);
     }
 
-    return 0;
+    return compare;
 }
 
 bool z_sv_equal_n(Z_String_View a, Z_String_View b, size_t n)
@@ -424,12 +427,12 @@ void z_str_trim_cset(Z_String *s, Z_String_View cset)
 
 void z_str_trim_right(Z_String *s)
 {
-    z_str_trim_right_cset(s, z_sv_from_cstr(Z__WHITE_SPACE));
+    z_str_trim_right_cset(s, z_sv(Z__WHITE_SPACE));
 }
 
 void z_str_trim_left(Z_String *s)
 {
-    z_str_trim_left_cset(s, z_sv_from_cstr(Z__WHITE_SPACE));
+    z_str_trim_left_cset(s, z_sv(Z__WHITE_SPACE));
 }
 
 void z_str_trim_right_cset(Z_String *s, Z_String_View cset)
@@ -450,7 +453,7 @@ void z_str_trim_left_cset(Z_String *s, Z_String_View cset)
 
 Z_String_View z_sv_trim(Z_String_View s)
 {
-    return z_sv_trim_cset(s, z_sv_from_cstr(Z__WHITE_SPACE));
+    return z_sv_trim_cset(s, z_sv(Z__WHITE_SPACE));
 }
 
 Z_String_View z_sv_trim_cset(Z_String_View s, Z_String_View cset)
@@ -461,7 +464,7 @@ Z_String_View z_sv_trim_cset(Z_String_View s, Z_String_View cset)
 
 Z_String_View z_sv_trim_right(Z_String_View s)
 {
-    return z_sv_trim_right_cset(s, z_sv_from_cstr(Z__WHITE_SPACE));
+    return z_sv_trim_right_cset(s, z_sv(Z__WHITE_SPACE));
 }
 
 Z_String_View z_sv_trim_right_cset(Z_String_View s, Z_String_View cset)
@@ -477,7 +480,7 @@ Z_String_View z_sv_trim_right_cset(Z_String_View s, Z_String_View cset)
 
 Z_String_View z_sv_trim_left(Z_String_View s)
 {
-    return z_sv_trim_left_cset(s, z_sv_from_cstr(Z__WHITE_SPACE));
+    return z_sv_trim_left_cset(s, z_sv(Z__WHITE_SPACE));
 }
 
 Z_String_View z_sv_trim_left_cset(Z_String_View s, Z_String_View cset)
@@ -505,17 +508,4 @@ void z_str_clear(Z_String *s)
 {
     s->length = 0;
     z_array_zero_terminate(s);
-}
-
-Z_String_Array z_str_array_filter(Z_String_Array array, bool callback(Z_String))
-{
-    Z_String_Array new_array = z_array_new(array.heap, Z_String_Array);
-
-    for (size_t i = 0; i < array.length; i++) {
-        if (callback(array.ptr[i])) {
-            z_array_push(&new_array, array.ptr[i]);
-        }
-    }
-
-    return new_array;
 }

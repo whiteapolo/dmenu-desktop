@@ -2,7 +2,6 @@
 #define CONFIG_H
 
 #define Z_BUFFER_GROWTH_FACTOR 2
-// #define Z_MEMORY_ALIGHMENT 16
-#define Z_ARENA_VIRTUAL_SPACE (4ULL * 1024 * 1024 * 1024)
+#define READ_BUFFER_SIZE 256
 
 #endif

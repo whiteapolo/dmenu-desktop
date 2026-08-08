@@ -4,11 +4,11 @@
 #include <z_string.h>
 
 typedef struct {
-  Z_String_View source;
-  size_t start;
-  size_t current;
-  size_t line;
-  size_t column;
+    Z_String_View source;
+    size_t start;
+    size_t current;
+    size_t line;
+    size_t column;
 } Z_Scanner;
 
 Z_Scanner z_scanner_new(Z_String_View source);

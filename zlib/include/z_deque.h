@@ -5,12 +5,12 @@
 #include <z_heap.h>
 
 typedef struct {
-  Z_Heap *heap;
-  void **ptr;
-  size_t size;
-  size_t capacity;
-  size_t front;
-  size_t rear;
+    Z_Heap *heap;
+    void **ptr;
+    size_t size;
+    size_t capacity;
+    size_t front;
+    size_t rear;
 } Z_Deque;
 
 Z_Deque z_deque_new(Z_Heap *heap);

@@ -5,9 +5,9 @@
 #include <stddef.h>
 
 typedef struct {
-  uintptr_t *ptr;
-  size_t occupied;
-  size_t capacity;
+    uintptr_t *ptr;
+    size_t occupied;
+    size_t capacity;
 } Z_Ptr_Table;
 
 typedef Z_Ptr_Table Z_Heap;

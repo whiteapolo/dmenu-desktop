@@ -1,24 +1,17 @@
 #ifndef FILE_H
 #define FILE_H
 
+#include <stdio.h>
 #include <z_heap.h>
 #include <z_string.h>
 
-typedef struct {
-  Z_String value;
-  bool ok;
-} Z_Maybe_String;
+bool z_file_write(const char *pathname, const char *format, ...);
+bool z_file_append(const char *pathname, const char *format, ...);
+bool z_file_scanf(const char *pathname, const char *format, ...);
 
-typedef struct {
-  Z_String_Array value;
-  bool ok;
-} Z_Maybe_String_Array;
+size_t z_file_read_line(FILE *fp, Z_String *out);
 
-bool z_write_file(const char *pathname, const char *format, ...);
-bool z_append_file(const char *pathname, const char *format, ...);
-bool z_scanf_file(const char *pathname, const char *format, ...);
-
-Z_Maybe_String z_read_file(Z_Heap *heap, const char *pathname);
-Z_Maybe_String_Array z_read_directory(Z_Heap *heap, const char *pathname);
+// TODO: fix
+// Z_Maybe_String_Array z_read_directory(Z_Heap *heap, const char *pathname);
 
 #endif

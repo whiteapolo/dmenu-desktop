@@ -8,13 +8,20 @@
 #include <unistd.h>
 
 typedef struct {
-  const char *ptr;
-  size_t length;
+    const char *ptr;
+    size_t length;
 } Z_String_View;
 
 Z_DEFINE_ARRAY(Z_String, char);
 Z_DEFINE_ARRAY(Z_String_Array, Z_String);
-Z_DEFINE_ARRAY(Z_String_View_Array, Z_String_View);
+Z_DEFINE_ARRAY(Z_String_View_Array, Z_String);
+
+typedef struct {
+    Z_String_View s;
+    Z_String_View delimeter;
+    size_t current;
+    bool is_done;
+} Z_Sv_Split_Iterator;
 
 Z_String z_str_new(Z_Heap *heap, const char *format, ...);
 Z_String z_str_new_args(Z_Heap *heap, const char *format, va_list args);
@@ -27,6 +34,7 @@ void z_str_append_format(Z_String *s, const char *format, ...);
 void z_str_append_format_va(Z_String *s, const char *format, va_list args);
 void z_str_append_str(Z_String *target, Z_String_View source);
 void z_str_append_char(Z_String *s, char c);
+bool z_str_append_file(Z_String *s, const char *pathname);
 
 void z_str_prepend_format(Z_String *s, const char *format, ...);
 void z_str_prepend_va(Z_String *s, const char *format, va_list args);
@@ -37,11 +45,9 @@ char z_str_pop_char(Z_String *s);
 void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement);
 void z_str_clear(Z_String *s);
 
-Z_String z_str_join(Z_Heap *heap, const Z_String_Array *array, Z_String_View delimiter);
-Z_String_View_Array z_sv_split(Z_Heap *heap, Z_String_View s, Z_String_View delimiter);
+Z_Sv_Split_Iterator z_sv_split(Z_String_View s, Z_String_View delimeter);
+bool z_sv_split_next(Z_Sv_Split_Iterator *iterator, Z_String_View *next);
 Z_String_View z_sv_split_part(Z_String_View s, Z_String_View delimiter, size_t index);
-Z_String_Array z_str_array_from(Z_Heap *heap, const char **s);
-Z_String_Array z_str_array_filter(Z_String_Array array, bool callback(Z_String));
 
 void z_str_trim(Z_String *s);
 void z_str_trim_cset(Z_String *s, Z_String_View cset);
@@ -54,11 +60,11 @@ Z_String_View z_sv_from_str_ptr(const Z_String *s);
 Z_String_View z_sv_from_str(Z_String s);
 Z_String_View z_sv_from_cstr(const char *s);
 
-#define z_sv(s) _Generic((s),                    \
-                Z_String   : z_sv_from_str,      \
-                Z_String * : z_sv_from_str_ptr,  \
-                const char * : z_sv_from_cstr,  \
-                char *     : z_sv_from_cstr)(s)
+#define z_sv(s) _Generic((s),                     \
+                Z_String     : z_sv_from_str,     \
+                Z_String *   : z_sv_from_str_ptr, \
+                char *       : z_sv_from_cstr,    \
+                const char * : z_sv_from_cstr)(s)
 
 Z_String_View z_sv_advance(Z_String_View s, size_t offset);
 Z_String_View z_sv_substring(Z_String_View s, int start, int end);
