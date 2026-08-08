@@ -7,13 +7,7 @@
 #include "./zlib/include/z_path.h"
 #include "./zlib/include/z_scanner.h"
 #include "./zlib/include/z_error.h"
-
-const char *DESKTOP_FILES_DIRECTORIES[] = {
-    "/usr/share/applications",
-    "~/.local/share/applications",
-    "/var/lib/flatpak/exports/share/applications",
-    NULL,
-};
+#include "./zlib/include/z_env.h"
 
 typedef struct {
     Z_Heap *heap;
@@ -46,7 +40,7 @@ bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname
     }
 
     if (name.length > 0 && exec.length > 0) {
-        z_hash_table_put(state->table, z_sv_to_cstr(state->heap, name), z_sv_to_cstr(state->heap, exec), NULL);
+        // z_hash_table_put(state->table, z_sv_to_cstr(state->heap, name), z_sv_to_cstr(state->heap, exec), NULL);
     }
 
     fclose(fp);
@@ -88,13 +82,22 @@ bool proccess_directory(Parse_Desktop_File_State *state, const char *pathname)
 
 void proccess_directories(Parse_Desktop_File_State *state)
 {
-    Z_Heap_Auto scratch = {0};
-    Z_String full_path = z_str_new(&scratch, "");
+    const char *dirs = z_try_get_env("XDG_DATA_DIRS", NULL);
 
-    for (const char **dir = DESKTOP_FILES_DIRECTORIES; *dir != NULL; dir++) {
-        z_expand_tilde(z_sv(*dir), &full_path);
-        proccess_directory(state, z_str_to_cstr(full_path));
-        z_str_clear(&full_path);
+    if (dirs == NULL) {
+        z_die("XDG_DATA_DIRS is not defined\n");
+    }
+
+    Z_Heap_Auto scratch = {0};
+    Z_Sv_Split_Iterator iter = z_sv_split(z_sv(dirs), z_sv(":"));
+    Z_String_View dir;
+    Z_String dir_str = z_str_new(&scratch, "");
+
+    while (z_sv_split_next(&iter, &dir)) {
+        z_str_append_str(&dir_str, dir);
+        z_str_append_cstr(&dir_str, "/applications");
+        proccess_directory(state, z_str_to_cstr(dir_str));
+        z_str_clear(&dir_str);
     }
 }
 

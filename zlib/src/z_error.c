@@ -3,7 +3,22 @@
 #include <z_string.h>
 #include <stdio.h>
 
+void z_die_va(const char *format, va_list args);
 void z_perror_format_va(const char *format, va_list args);
+
+void z_die(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    z_die_va(format, args);
+    va_end(args);
+}
+
+void z_die_va(const char *format, va_list args)
+{
+    vfprintf(stderr, format, args);
+    exit(EXIT_FAILURE);
+}
 
 void z_perror_format(const char *format, ...)
 {
