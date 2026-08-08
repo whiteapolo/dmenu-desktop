@@ -1,11 +1,20 @@
-#include <z_heap.h>
 #include <internal/z_math.h>
 #include <stdbool.h>
+#include <z_hash_table.h>
 
 #define Z_PTR_TABLE_MIN_CAPACITY 16
 #define Z_PTR_TABLE_MAX_LOAD_FACTOR 0.7
 #define Z_PTR_TABLE_TOMBSTONE ((uintptr_t)1)
 #define Z_PTR_TABLE_EMPTY ((uintptr_t)0)
+
+void z__ptr_table_insert_no_check(Z_Ptr_Table *table, uintptr_t ptr);
+static inline size_t z__ptr_table_fast_mod(size_t value, size_t mod);
+static inline uintptr_t z__ptr_table_hash(uintptr_t ptr);
+void z__ptr_table_resize(Z_Ptr_Table *table, size_t new_capacity);
+void z_ptr_table_insert(Z_Ptr_Table *table, uintptr_t ptr);
+bool z_ptr_table_delete(Z_Ptr_Table *table, uintptr_t ptr);
+void z_ptr_table_free(Z_Ptr_Table *table);
+void z_ptr_table_reset(Z_Ptr_Table *table);
 
 static inline size_t z__ptr_table_fast_mod(size_t value, size_t mod)
 {

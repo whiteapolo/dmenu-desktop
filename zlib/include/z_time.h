@@ -5,7 +5,7 @@
 
 typedef clock_t Z_Clock;
 
-clock_t z_get_clock();
+clock_t z_get_clock(void);
 void z_print_elapsed_seconds(clock_t start);
 
 #endif

@@ -6,6 +6,7 @@
 #include "./zlib/include/z_heap.h"
 #include "./zlib/include/z_path.h"
 #include "./zlib/include/z_scanner.h"
+#include "./zlib/include/z_error.h"
 
 const char *DESKTOP_FILES_DIRECTORIES[] = {
     "/usr/share/applications",
@@ -63,7 +64,7 @@ bool proccess_directory(Parse_Desktop_File_State *state, const char *pathname)
     DIR *dir = opendir(pathname);
 
     if (!dir) {
-        perror("Cant open dir");
+        z_perror_format("opendir('%s')", pathname);
         return false;
     }
 
@@ -110,9 +111,10 @@ int main()
     proccess_directories(&state);
 
     Z_Pair_Array pairs = z_hash_table_to_array(&heap, &table);
+    printf("%zu\n", table.size);
 
     for (size_t i = 0; i < pairs.length; i++) {
-        printf("%s: %s\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].key);
+        // printf("%s: %s\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].key);
     }
 
     return 0;

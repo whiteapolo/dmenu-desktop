@@ -1,5 +1,9 @@
 #include <z_hash_table.h>
 
+void z__hash_table_free(Z_Hash_Table *table);
+bool z__hash_table_put_no_resize(Z_Hash_Table *table, void *key, void *value, size_t hash, Z_Pair *pair);
+void z__hash_table_resize(Z_Hash_Table *table, size_t new_capacity);
+
 Z_Pair z_make_pair(void *key, void *value)
 {
     Z_Pair pair = {
@@ -97,7 +101,7 @@ bool z__hash_table_put_no_resize(Z_Hash_Table *table, void *key, void *value, si
     while (table->hashes[i] != Z_HASH_TABLE_EMPTY) {
 
         if (first_tompstone == -1 && table->hashes[i] == Z_HASH_TABLE_TOMBSTONE) {
-            first_tompstone = i;
+            first_tompstone = (ssize_t)i;
         }
 
         if (table->hashes[i] == hash && table->equal(table->keys[i], key)) {
@@ -224,7 +228,7 @@ size_t z_str_hash(const void *s)
     size_t hash = 5381;
 
     for (const char *curr = s; *curr != '\0'; curr++) {
-        hash = ((hash << 5) + hash) + *curr;
+        hash = ((hash << 5) + hash) + (size_t)*curr;
     }
 
     return hash;

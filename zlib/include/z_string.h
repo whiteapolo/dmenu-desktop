@@ -67,7 +67,7 @@ Z_String_View z_sv_from_cstr(const char *s);
                 const char * : z_sv_from_cstr)(s)
 
 Z_String_View z_sv_advance(Z_String_View s, size_t offset);
-Z_String_View z_sv_substring(Z_String_View s, int start, int end);
+Z_String_View z_sv_substring(Z_String_View s, size_t start, size_t end);
 
 char z_sv_top(Z_String_View s);
 int  z_sv_compare(Z_String_View a, Z_String_View b);

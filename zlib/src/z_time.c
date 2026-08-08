@@ -1,7 +1,7 @@
 #include <z_time.h>
 #include <stdio.h>
 
-Z_Clock z_get_clock()
+Z_Clock z_get_clock(void)
 {
     return clock();
 }

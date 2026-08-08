@@ -6,6 +6,9 @@
 
 #define Z__WHITE_SPACE " \f\n\r\t\v"
 
+int z__size_t_to_int(size_t a);
+size_t z__get_format_length(const char *format, va_list args);
+
 int z__size_t_to_int(size_t a)
 {
     return a > INT_MAX ? INT_MAX : (int)a;
@@ -15,11 +18,11 @@ size_t z__get_format_length(const char *format, va_list args)
 {
     va_list args_copy;
     va_copy(args_copy, args);
-
-    size_t size = vsnprintf(NULL, 0, format, args_copy);
+    int size = vsnprintf(NULL, 0, format, args_copy);
     va_end(args_copy);
+    assert(size >= 0);
 
-    return size;
+    return (size_t)size;
 }
 
 Z_String z_str_new(Z_Heap *heap, const char *format, ...)
@@ -193,14 +196,14 @@ bool z_sv_split_next(Z_Sv_Split_Iterator *iterator, Z_String_View *slice)
     Z_String_View small_world = z_sv_advance(iterator->s, iterator->current);
     ssize_t next = z_sv_find_index(small_world, iterator->delimeter);
 
-    if (next == -1) {
+    if (next < 0) {
         iterator->current += small_world.length + 1;
         *slice = small_world;
         return true;
     }
 
-    iterator->current += next + iterator->delimeter.length;
-    *slice = z_sv_substring(small_world, 0, next);
+    iterator->current += (size_t)next + iterator->delimeter.length;
+    *slice = z_sv_substring(small_world, 0, (size_t)next);
     return true;
 }
 
@@ -257,7 +260,7 @@ Z_String_View z_sv_advance(Z_String_View s, size_t offset)
     return view;
 }
 
-Z_String_View z_sv_substring(Z_String_View s, int start, int end)
+Z_String_View z_sv_substring(Z_String_View s, size_t start, size_t end)
 {
     Z_String_View view = {
         .ptr = s.ptr + start,
@@ -320,15 +323,15 @@ bool z_sv_like(Z_String_View str, Z_String_View pattern)
 
     while (i < str.length && j < pattern.length) {
         if (pattern.ptr[j] == '%') {
-            last_pattern_wildcard = j;
-            last_wildcard_match = i;
+            last_pattern_wildcard = (ssize_t)j;
+            last_wildcard_match = (ssize_t)i;
             j++;
         } else if (str.ptr[i] == pattern.ptr[j] || pattern.ptr[j] == '_') {
             i++;
             j++;
         } else if (last_pattern_wildcard != -1) {
-            j = last_pattern_wildcard + 1;
-            i = ++last_wildcard_match;
+            j = (size_t)last_pattern_wildcard + 1;
+            i = (size_t)++last_wildcard_match;
         } else {
             return false;
         }
@@ -347,13 +350,8 @@ bool z_sv_like(Z_String_View str, Z_String_View pattern)
 
 int z_sv_compare_n(Z_String_View a, Z_String_View b, size_t n)
 {
-    int compare = memcmp(a.ptr, b.ptr, z__min_size_t(n, z__min_size_t(a.length, b.length)));
-
-    if (compare == 0) {
-        return z__size_t_to_int(a.length) - z__size_t_to_int(b.length);
-    }
-
-    return compare;
+    assert(n <= z__min_size_t(n, z__min_size_t(a.length, b.length)));
+    return memcmp(a.ptr, b.ptr, z__min_size_t(n, z__min_size_t(a.length, b.length)));
 }
 
 bool z_sv_equal_n(Z_String_View a, Z_String_View b, size_t n)
@@ -406,7 +404,7 @@ ssize_t z_sv_find_index(Z_String_View haystack, Z_String_View needle)
 
     for (size_t i = 0; i < haystack.length - needle.length + 1; i++) {
         if (memcmp(haystack.ptr + i, needle.ptr, needle.length) == 0) {
-            return i;
+            return (ssize_t)i;
         }
     }
 

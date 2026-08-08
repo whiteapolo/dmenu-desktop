@@ -3,15 +3,19 @@
 #include <string.h>
 #include <dirent.h>
 
+size_t z__get_file_size(FILE *fp);
+
 size_t z__get_file_size(FILE *fp)
 {
-    size_t curr = ftell(fp);
+    long curr = ftell(fp);
+    assert(curr >= 0);
     fseek(fp, 0, SEEK_END);
 
-    size_t size = ftell(fp);
+    long size = ftell(fp);
+    assert(size >= 0);
     fseek(fp, curr, SEEK_SET);
 
-    return size;
+    return (size_t)size;
 }
 
 bool z_file_write(const char *pathname, const char *format, ...)
