@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <dirent.h>
+#include <stdlib.h>
 #include "./zlib/include/z_file.h"
 #include "./zlib/include/z_string.h"
 #include "./zlib/include/z_hash_table.h"
@@ -8,11 +9,30 @@
 #include "./zlib/include/z_scanner.h"
 #include "./zlib/include/z_error.h"
 #include "./zlib/include/z_env.h"
+#include <linux/limits.h>
 
 typedef struct {
     Z_Heap *heap;
     Z_Hash_Table *table;
 } Parse_Desktop_File_State;
+
+typedef struct {
+    Z_String name;
+    Z_String exec;
+    Z_String icon;
+    Z_String absolute_path;
+} Desktop_File;
+
+Desktop_File *make_desktop_file(Z_Heap *heap, Z_String_View name, Z_String_View exec, Z_String_View icon, Z_String_View absolute_path)
+{
+    Desktop_File *desktop_file = z_heap_malloc(heap, sizeof(Desktop_File));
+    desktop_file->name = z_str_new_from_sv(heap, name);
+    desktop_file->exec = z_str_new_from_sv(heap, exec);
+    desktop_file->icon = z_str_new_from_sv(heap, icon);
+    desktop_file->absolute_path = z_str_new_from_sv(heap, absolute_path);
+
+    return desktop_file;
+}
 
 bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
 {
@@ -24,26 +44,34 @@ bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname
     }
 
     Z_String line = z_str_new(&scratch, "");
-    char *name = NULL;
-    char *exec = NULL; 
+    Z_String name = z_str_new(&scratch, "");
+    Z_String exec = z_str_new(&scratch, "");
+    Z_String icon = z_str_new(&scratch, "");
 
-    while(z_file_read_line(fp, &line) && (name == NULL || exec == NULL)) {
+    while(z_file_read_line(fp, &line) && !(name.length && exec.length && icon.length)) {
         Z_String_View line_sv = z_sv(line);
 
-        if (z_sv_like(line_sv, z_sv("Name=%"))) {
-            name = z_sv_to_cstr(state->heap, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
-        } else if (z_sv_like(line_sv, z_sv("Exec=%"))) {
-            exec = z_sv_to_cstr(state->heap, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
+        if (z_sv_like(line_sv, z_sv("Name=%")) && name.length == 0) {
+            z_str_append_str(&name, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
+        } else if (z_sv_like(line_sv, z_sv("Exec=%")) && exec.length == 0) {
+            z_str_append_str(&exec, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
+        } else if (z_sv_like(line_sv, z_sv("Icon=%")) && icon.length == 0) {
+            z_str_append_str(&icon, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
         }
 
         z_str_clear(&line);
     }
 
-    if (name && exec) {
-        z_hash_table_put(state->table, name, exec, NULL);
-    } else {
-        z_heap_free(state->heap, name);
-        z_heap_free(state->heap, exec);
+    z_str_trim(&name);
+    z_str_trim(&exec);
+    z_str_trim(&icon);
+
+    
+    if (name.length && exec.length) {
+        char absolute_path[PATH_MAX];
+        realpath(pathname, absolute_path);
+        Desktop_File *desktop_File = make_desktop_file(state->heap, z_sv(name), z_sv(exec), z_sv(icon), z_sv(absolute_path));
+        z_hash_table_put(state->table, z_str_to_cstr(name), desktop_File, NULL);
     }
 
     fclose(fp);
@@ -104,6 +132,42 @@ void proccess_directories(Parse_Desktop_File_State *state)
     }
 }
 
+// `firefox %F` -> `firefox`
+void remove_field_codes(Z_String *command, Z_String_View name, Z_String_View icon)
+{
+    Z_Heap_Auto heap = {0};
+
+    z_str_replace(command, z_sv("%f"), z_sv(""));
+    z_str_replace(command, z_sv("%F"), z_sv(""));
+    z_str_replace(command, z_sv("%u"), z_sv(""));
+    z_str_replace(command, z_sv("%U"), z_sv(""));
+    z_str_replace(command, z_sv("%c"), name);
+
+    // real path
+    z_str_replace(command, z_sv("%k"), z_sv(""));
+
+
+    if (icon.length) {
+        Z_String icon_argument = z_str_new(&heap, "--icon %.*s", icon.length, icon.ptr);
+        z_str_replace(command, z_sv("%i"), z_sv(icon_argument));
+    } else {
+        z_str_replace(command, z_sv("%i"), z_sv(""));
+    }
+}
+
+void print_desktop_file(Desktop_File *desktop_File)
+{
+    printf("{ Name: '");
+    z_sv_print(z_sv(desktop_File->name));
+    printf("', Exec: '");
+    z_sv_print(z_sv(desktop_File->exec));
+    printf("', Icon: '");
+    z_sv_print(z_sv(desktop_File->icon));
+    printf("', absolutePathname: '");
+    z_sv_print(z_sv(desktop_File->absolute_path));
+    printf("' }\n");
+}
+
 int main()
 {
     Z_Heap_Auto heap = {0};
@@ -120,7 +184,7 @@ int main()
     printf("%zu\n", table.size);
 
     for (size_t i = 0; i < pairs.length; i++) {
-        // printf("%s: %s\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].value);
+        print_desktop_file(pairs.ptr[i].value);
     }
 
     return 0;
