@@ -52,10 +52,10 @@ static inline size_t z__hash_table_hash(const Z_Hash_Table *table, void *key)
     size_t hash = table->hash(key);
 
     if (hash < 2) {
-        return 2;
+        return hash + 2;
     }
 
-    return hash * 11;
+    return hash;
 }
 
 static inline float z__hash_table_get_load_factor(const Z_Hash_Table *table)
@@ -95,7 +95,7 @@ void *z_hash_table_get(const Z_Hash_Table *table, void *key)
 
 bool z__hash_table_put_no_resize(Z_Hash_Table *table, void *key, void *value, size_t hash, Z_Pair *pair)
 {
-    size_t i = hash & (table->capacity - 1);
+    size_t i = hash % table->capacity;
     ssize_t first_tompstone = -1;
 
     while (table->hashes[i] != Z_HASH_TABLE_EMPTY) {
@@ -162,6 +162,10 @@ bool z_hash_table_put(Z_Hash_Table *table, void *key, void *value, Z_Pair *pair)
 
 bool z_hash_table_delete(Z_Hash_Table *table, void *key, Z_Pair *pair)
 {
+    if (table->size == 0) {
+        return false;
+    }
+
     size_t hash = z__hash_table_hash(table, key);
     size_t i = hash % table->capacity;
 
@@ -176,7 +180,10 @@ bool z_hash_table_delete(Z_Hash_Table *table, void *key, Z_Pair *pair)
     table->hashes[i] = Z_HASH_TABLE_TOMBSTONE;
     table->size--;
 
-    *pair = z_make_pair(table->keys[i], table->values[i]);
+    if (pair) {
+        *pair = z_make_pair(table->keys[i], table->values[i]);
+    }
+
     return true;
 }
 

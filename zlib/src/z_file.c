@@ -78,12 +78,13 @@ size_t z_file_read_line(FILE *fp, Z_String *out)
     char buffer[READ_BUFFER_SIZE] = {0};
     size_t start_length = out->length;
 
-    while (fgets(buffer, READ_BUFFER_SIZE, fp) && !strchr(buffer, '\n')) {
+    while (fgets(buffer, READ_BUFFER_SIZE, fp)) {
         z_str_append_cstr(out, buffer);
-        buffer[0] = '\0';
-    }
 
-    z_str_append_cstr(out, buffer);
+        if (strchr(buffer, '\n')) {
+            break;
+        }
+    }
 
     return out->length - start_length;
 }
