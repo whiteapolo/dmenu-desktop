@@ -24,23 +24,26 @@ bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname
     }
 
     Z_String line = z_str_new(&scratch, "");
-    Z_String_View name = z_sv("");
-    Z_String_View exec = z_sv("");
+    char *name = NULL;
+    char *exec = NULL; 
 
-    while(z_file_read_line(fp, &line) && (name.length == 0 || exec.length == 0)) {
+    while(z_file_read_line(fp, &line) && (name == NULL || exec == NULL)) {
         Z_String_View line_sv = z_sv(line);
 
         if (z_sv_like(line_sv, z_sv("Name=%"))) {
-            name = z_sv_split_part(line_sv, z_sv("="), 1);
+            name = z_sv_to_cstr(state->heap, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
         } else if (z_sv_like(line_sv, z_sv("Exec=%"))) {
-            exec = z_sv_split_part(line_sv, z_sv("="), 1);
+            exec = z_sv_to_cstr(state->heap, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
         }
 
         z_str_clear(&line);
     }
 
-    if (name.length > 0 && exec.length > 0) {
-        // z_hash_table_put(state->table, z_sv_to_cstr(state->heap, name), z_sv_to_cstr(state->heap, exec), NULL);
+    if (name && exec) {
+        z_hash_table_put(state->table, name, exec, NULL);
+    } else {
+        z_heap_free(state->heap, name);
+        z_heap_free(state->heap, exec);
     }
 
     fclose(fp);
@@ -117,7 +120,7 @@ int main()
     printf("%zu\n", table.size);
 
     for (size_t i = 0; i < pairs.length; i++) {
-        // printf("%s: %s\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].key);
+        // printf("%s: %s\n", (char*)pairs.ptr[i].key, (char*)pairs.ptr[i].value);
     }
 
     return 0;
