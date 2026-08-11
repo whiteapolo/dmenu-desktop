@@ -16,22 +16,26 @@ typedef struct {
     Z_Hash_Table *table;
 } Parse_Desktop_File_State;
 
-typedef struct {
-    Z_String name;
-    Z_String exec;
-    Z_String icon;
-    Z_String absolute_path;
-} Desktop_File;
-
-Desktop_File *make_desktop_file(Z_Heap *heap, Z_String_View name, Z_String_View exec, Z_String_View icon, Z_String_View absolute_path)
+char *exec_to_full_command(Z_Heap *heap, Z_String_View exec, Z_String_View name, Z_String_View icon, Z_String_View desktop_file_pathname)
 {
-    Desktop_File *desktop_file = z_heap_malloc(heap, sizeof(Desktop_File));
-    desktop_file->name = z_str_new_from_sv(heap, name);
-    desktop_file->exec = z_str_new_from_sv(heap, exec);
-    desktop_file->icon = z_str_new_from_sv(heap, icon);
-    desktop_file->absolute_path = z_str_new_from_sv(heap, absolute_path);
+    Z_String command = z_str_new_from_sv(heap, exec);
+    z_str_replace(&command, z_sv("%f"), z_sv(""));
+    z_str_replace(&command, z_sv("%F"), z_sv(""));
+    z_str_replace(&command, z_sv("%u"), z_sv(""));
+    z_str_replace(&command, z_sv("%U"), z_sv(""));
+    z_str_replace(&command, z_sv("%c"), name);
+    z_str_replace(&command, z_sv("%k"), desktop_file_pathname);
 
-    return desktop_file;
+    if (icon.length) {
+        Z_Heap_Auto scratch = {0};
+        Z_String icon_argument = z_str_new(&scratch, "--icon %.*s", icon.length, icon.ptr);
+        z_str_replace(&command, z_sv("%i"), z_sv(icon_argument));
+    } else {
+        z_str_replace(&command, z_sv("%i"), z_sv(""));
+    }
+
+    z_str_trim(&command);
+    return z_str_to_cstr(command);
 }
 
 bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
@@ -61,14 +65,10 @@ bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname
 
         z_str_clear(&line);
     }
-
-    z_str_trim(&name);
-    z_str_trim(&exec);
-    z_str_trim(&icon);
     
     if (name.length && exec.length) {
-        Desktop_File *desktop_File = make_desktop_file(state->heap, z_sv(name), z_sv(exec), z_sv(icon), z_sv(pathname));
-        z_hash_table_put(state->table, z_str_to_cstr(name), desktop_File, NULL);
+        char *command = exec_to_full_command(state->heap, z_sv(exec), z_sv(name), z_sv(icon), z_sv(pathname));
+        z_hash_table_put(state->table, z_str_to_cstr(name), command, NULL);
     }
 
     fclose(fp);
@@ -129,40 +129,6 @@ void proccess_directories(Parse_Desktop_File_State *state)
     }
 }
 
-// `firefox %F` -> `firefox`
-void remove_field_codes(Z_String *command, Z_String_View name, Z_String_View icon)
-{
-    Z_Heap_Auto heap = {0};
-
-    z_str_replace(command, z_sv("%f"), z_sv(""));
-    z_str_replace(command, z_sv("%F"), z_sv(""));
-    z_str_replace(command, z_sv("%u"), z_sv(""));
-    z_str_replace(command, z_sv("%U"), z_sv(""));
-    z_str_replace(command, z_sv("%c"), name);
-
-    // real path
-    z_str_replace(command, z_sv("%k"), z_sv(""));
-
-
-    if (icon.length) {
-        Z_String icon_argument = z_str_new(&heap, "--icon %.*s", icon.length, icon.ptr);
-        z_str_replace(command, z_sv("%i"), z_sv(icon_argument));
-    } else {
-        z_str_replace(command, z_sv("%i"), z_sv(""));
-    }
-}
-
-void print_desktop_file(Desktop_File *desktop_File)
-{
-    printf(
-        "{ Name: '%s', Exec: '%s', Icon: '%s', Path: '%s' }\n",
-        z_str_to_cstr(desktop_File->name),
-        z_str_to_cstr(desktop_File->exec),
-        z_str_to_cstr(desktop_File->icon),
-        z_str_to_cstr(desktop_File->absolute_path)
-    );
-}
-
 int main()
 {
     Z_Heap_Auto heap = {0};
@@ -179,7 +145,7 @@ int main()
     printf("%zu\n", table.size);
 
     for (size_t i = 0; i < pairs.length; i++) {
-        print_desktop_file(pairs.ptr[i].value);
+        printf("{ Name: '%s', Exec: '%s' }\n", (char *)pairs.ptr[i].key, (char *)pairs.ptr[i].value);
     }
 
     return 0;

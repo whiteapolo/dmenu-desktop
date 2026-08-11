@@ -164,7 +164,7 @@ void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement)
     while (i < s->length) {
         if (z_sv_equal(z_sv_advance(z_sv(s), i), target)) {
             z_str_append_str(&tmp, replacement);
-            i += replacement.length;
+            i += target.length;
         } else {
             z_str_append_char(&tmp, s->ptr[i]);
             i++;
