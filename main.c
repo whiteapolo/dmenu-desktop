@@ -65,12 +65,9 @@ bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname
     z_str_trim(&name);
     z_str_trim(&exec);
     z_str_trim(&icon);
-
     
     if (name.length && exec.length) {
-        char absolute_path[PATH_MAX];
-        realpath(pathname, absolute_path);
-        Desktop_File *desktop_File = make_desktop_file(state->heap, z_sv(name), z_sv(exec), z_sv(icon), z_sv(absolute_path));
+        Desktop_File *desktop_File = make_desktop_file(state->heap, z_sv(name), z_sv(exec), z_sv(icon), z_sv(pathname));
         z_hash_table_put(state->table, z_str_to_cstr(name), desktop_File, NULL);
     }
 
@@ -157,15 +154,13 @@ void remove_field_codes(Z_String *command, Z_String_View name, Z_String_View ico
 
 void print_desktop_file(Desktop_File *desktop_File)
 {
-    printf("{ Name: '");
-    z_sv_print(z_sv(desktop_File->name));
-    printf("', Exec: '");
-    z_sv_print(z_sv(desktop_File->exec));
-    printf("', Icon: '");
-    z_sv_print(z_sv(desktop_File->icon));
-    printf("', absolutePathname: '");
-    z_sv_print(z_sv(desktop_File->absolute_path));
-    printf("' }\n");
+    printf(
+        "{ Name: '%s', Exec: '%s', Icon: '%s', Path: '%s' }\n",
+        z_str_to_cstr(desktop_File->name),
+        z_str_to_cstr(desktop_File->exec),
+        z_str_to_cstr(desktop_File->icon),
+        z_str_to_cstr(desktop_File->absolute_path)
+    );
 }
 
 int main()
