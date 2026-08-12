@@ -16,26 +16,16 @@ typedef struct {
     Z_Hash_Table *table;
 } Parse_Desktop_File_State;
 
-char *exec_to_full_command(Z_Heap *heap, Z_String_View exec, Z_String_View name, Z_String_View icon, Z_String_View desktop_file_pathname)
+void remove_field_codes(Z_String *command)
 {
-    Z_String command = z_str_new_from_sv(heap, exec);
-    z_str_replace(&command, z_sv("%f"), z_sv(""));
-    z_str_replace(&command, z_sv("%F"), z_sv(""));
-    z_str_replace(&command, z_sv("%u"), z_sv(""));
-    z_str_replace(&command, z_sv("%U"), z_sv(""));
-    z_str_replace(&command, z_sv("%c"), name);
-    z_str_replace(&command, z_sv("%k"), desktop_file_pathname);
-
-    if (icon.length) {
-        Z_Heap_Auto scratch = {0};
-        Z_String icon_argument = z_str_new(&scratch, "--icon %.*s", icon.length, icon.ptr);
-        z_str_replace(&command, z_sv("%i"), z_sv(icon_argument));
-    } else {
-        z_str_replace(&command, z_sv("%i"), z_sv(""));
-    }
-
-    z_str_trim(&command);
-    return z_str_to_cstr(command);
+    z_str_replace(command, z_sv("%f"), z_sv(""));
+    z_str_replace(command, z_sv("%F"), z_sv(""));
+    z_str_replace(command, z_sv("%u"), z_sv(""));
+    z_str_replace(command, z_sv("%U"), z_sv(""));
+    z_str_replace(command, z_sv("%i"), z_sv(""));
+    z_str_replace(command, z_sv("%c"), z_sv(""));
+    z_str_replace(command, z_sv("%k"), z_sv(""));
+    z_str_trim(command);
 }
 
 bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
@@ -50,29 +40,29 @@ bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname
     Z_String line = z_str_new(&scratch, "");
     Z_String name = z_str_new(&scratch, "");
     Z_String exec = z_str_new(&scratch, "");
-    Z_String icon = z_str_new(&scratch, "");
 
-    while(z_file_read_line(fp, &line) && !(name.length && exec.length && icon.length)) {
+    while(z_file_read_line(fp, &line) && !(name.length && exec.length)) {
         Z_String_View line_sv = z_sv(line);
 
         if (z_sv_like(line_sv, z_sv("Name=%")) && name.length == 0) {
             z_str_append_str(&name, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
         } else if (z_sv_like(line_sv, z_sv("Exec=%")) && exec.length == 0) {
             z_str_append_str(&exec, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
-        } else if (z_sv_like(line_sv, z_sv("Icon=%")) && icon.length == 0) {
-            z_str_append_str(&icon, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
         }
 
         z_str_clear(&line);
     }
-    
-    if (name.length && exec.length) {
-        char *command = exec_to_full_command(state->heap, z_sv(exec), z_sv(name), z_sv(icon), z_sv(pathname));
-        z_hash_table_put(state->table, z_str_to_cstr(name), command, NULL);
-    }
 
     fclose(fp);
-    return true;
+    
+    if (name.length && exec.length) {
+        char *key = z_str_to_cstr(z_str_new_from_sv(state->heap, z_sv(name)));
+        char *value = z_str_to_cstr(z_str_new_from_sv(state->heap, z_sv(exec)));
+        z_hash_table_put(state->table, key, value, NULL);
+        return true;
+    }
+
+    return false;
 }
 
 bool is_desktop_file(Z_String_View path)

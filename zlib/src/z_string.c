@@ -162,7 +162,7 @@ void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement)
     size_t i = 0;
 
     while (i < s->length) {
-        if (z_sv_equal(z_sv_advance(z_sv(s), i), target)) {
+        if (z_sv_equal_n(z_sv_advance(z_sv(s), i), target, target.length)) {
             z_str_append_str(&tmp, replacement);
             i += target.length;
         } else {
@@ -350,8 +350,14 @@ bool z_sv_like(Z_String_View str, Z_String_View pattern)
 
 int z_sv_compare_n(Z_String_View a, Z_String_View b, size_t n)
 {
-    assert(n <= z__min_size_t(n, z__min_size_t(a.length, b.length)));
-    return memcmp(a.ptr, b.ptr, z__min_size_t(n, z__min_size_t(a.length, b.length)));
+    size_t length = z__min_size_t(n, z__min_size_t(a.length, b.length));
+    int result = memcmp(a.ptr, b.ptr, length);
+
+    if (result != 0) return result;
+    if (n <= length) return 0;
+    if (a.length < b.length) return -1;
+    if (a.length > b.length) return 1;
+    return 0;
 }
 
 bool z_sv_equal_n(Z_String_View a, Z_String_View b, size_t n)
