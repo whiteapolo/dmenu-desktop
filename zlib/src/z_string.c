@@ -54,6 +54,11 @@ char *z_sv_to_cstr(Z_Heap *heap, Z_String_View s)
     return ret;
 }
 
+char *z_cstr_dup(Z_Heap *heap, const char *s)
+{
+    return z_sv_to_cstr(heap, z_sv(s));
+}
+
 char *z_str_to_cstr(Z_String s)
 {
     return s.ptr;
@@ -175,9 +180,9 @@ void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement)
     z_str_append_format(s, "%s", tmp.ptr);
 }
 
-Z_Sv_Split_Iterator z_sv_split(Z_String_View s, Z_String_View delimeter)
+Z_Sv_Split_Iter z_sv_split(Z_String_View s, Z_String_View delimeter)
 {
-    Z_Sv_Split_Iterator iter = {
+    Z_Sv_Split_Iter iter = {
         .s = s,
         .delimeter = delimeter,
         .current = 0,
@@ -187,7 +192,7 @@ Z_Sv_Split_Iterator z_sv_split(Z_String_View s, Z_String_View delimeter)
     return iter;
 }
 
-bool z_sv_split_next(Z_Sv_Split_Iterator *iterator, Z_String_View *slice)
+bool z_sv_split_next(Z_Sv_Split_Iter *iterator, Z_String_View *slice)
 {
     if (iterator->current > iterator->s.length) {
         return false;
@@ -209,7 +214,7 @@ bool z_sv_split_next(Z_Sv_Split_Iterator *iterator, Z_String_View *slice)
 
 Z_String_View z_sv_split_part(Z_String_View s, Z_String_View delimiter, size_t index)
 {
-    Z_Sv_Split_Iterator iter = z_sv_split(s, delimiter);
+    Z_Sv_Split_Iter iter = z_sv_split(s, delimiter);
     Z_String_View slice;
 
     for (size_t i = 0; i < index; i++) {

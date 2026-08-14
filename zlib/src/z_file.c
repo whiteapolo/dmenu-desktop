@@ -3,7 +3,13 @@
 #include <string.h>
 #include <dirent.h>
 
+#define PIPE_IN 1
+#define PIPE_OUT 0
+
+FILE *fdopen(int fd, const char *mode);
 size_t z__get_file_size(FILE *fp);
+void z_safe_pipe(int fd[2]);
+int z_safe_fork(void);
 
 size_t z__get_file_size(FILE *fp)
 {
@@ -87,4 +93,77 @@ size_t z_file_read_line(FILE *fp, Z_String *out)
     }
 
     return out->length - start_length;
+}
+
+void z_safe_pipe(int fd[2])
+{
+    if (pipe(fd) == -1) {
+        perror("pipe() faild");
+        exit(EXIT_FAILURE);
+    }
+}
+
+int z_safe_fork(void)
+{
+    int pid = fork();
+
+    if (pid == -1) {
+        perror("fork() faild");
+        exit(EXIT_FAILURE);
+    }
+
+    return pid;
+}
+
+Z_Piped_Proccess z_pipe_proccess(char *args[], Z_Redirect redirect)
+{
+    int stdin[2];
+    int stdout[2];
+    int stderr[2];
+
+    if (redirect & Z_Redirect_Stdin) z_safe_pipe(stdin);
+    if (redirect & Z_Redirect_Stdout) z_safe_pipe(stdout);
+    if (redirect & Z_Redirect_Stderr) z_safe_pipe(stderr);
+
+    int pid = z_safe_fork();
+
+    if (pid == 0) { // child
+        if (redirect & Z_Redirect_Stdin) {
+            dup2(stdin[PIPE_OUT], STDIN_FILENO);
+            close(stdin[PIPE_IN]);
+        }
+
+        if (redirect & Z_Redirect_Stdout) {
+            dup2(stdout[PIPE_IN], STDOUT_FILENO);
+            close(stdout[PIPE_OUT]);
+        }
+
+        if (redirect & Z_Redirect_Stderr) {
+            dup2(stderr[PIPE_IN], STDERR_FILENO);
+            close(stderr[PIPE_OUT]);
+        }
+
+        execvp(args[0], args);
+        perror("exec() failed");
+        exit(EXIT_FAILURE);
+    }
+
+    Z_Piped_Proccess piped_process = {0};
+
+    if (redirect & Z_Redirect_Stdin) {
+        close(stdin[PIPE_OUT]);
+        piped_process.stdin = fdopen(stdin[PIPE_IN], "w");
+    }
+
+    if (redirect & Z_Redirect_Stdout) {
+        close(stdout[PIPE_IN]);
+        piped_process.stdout = fdopen(stdout[PIPE_OUT], "r");
+    }
+
+    if (redirect & Z_Redirect_Stderr) {
+        close(stderr[PIPE_IN]);
+        piped_process.stderr = fdopen(stderr[PIPE_OUT], "r");
+    }
+
+    return piped_process;
 }

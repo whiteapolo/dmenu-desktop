@@ -112,7 +112,7 @@ bool z__hash_table_put_no_resize(Z_Hash_Table *table, void *key, void *value, si
             if (pair) {
                 *pair = old;
             }
-            
+
             return true;
         }
 
@@ -223,6 +223,34 @@ Z_Pair_Array z_hash_table_to_array(Z_Heap *heap, const Z_Hash_Table *table)
     }
 
     return array;
+}
+
+Z_Hash_Table_Iter z_hash_table_iter(const Z_Hash_Table *ht)
+{
+    Z_Hash_Table_Iter iter = {
+        .ht = ht,
+        .i = 0,
+    };
+
+    return iter;
+}
+
+bool z_hash_table_iter_next(Z_Hash_Table_Iter *iter, Z_Pair *pair)
+{
+    const Z_Hash_Table *ht = iter->ht;
+    size_t *i = &iter->i;
+
+    while (*i < ht->capacity) {
+        if (ht->hashes[*i] >= 2) {
+            *pair = z_make_pair(ht->keys[*i], ht->values[*i]);
+            (*i)++;
+            return true;
+        }
+
+        (*i)++;
+    }
+
+    return false;
 }
 
 bool z_str_equal(const void *a, const void *b)

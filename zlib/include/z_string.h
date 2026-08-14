@@ -21,13 +21,14 @@ typedef struct {
     Z_String_View delimeter;
     size_t current;
     bool is_done;
-} Z_Sv_Split_Iterator;
+} Z_Sv_Split_Iter;
 
 Z_String z_str_new(Z_Heap *heap, const char *format, ...);
 Z_String z_str_new_args(Z_Heap *heap, const char *format, va_list args);
 Z_String z_str_new_from_sv(Z_Heap *heap, Z_String_View s);
 char *z_sv_to_cstr(Z_Heap *heap, Z_String_View s);
 char *z_str_to_cstr(Z_String s);
+char *z_cstr_dup(Z_Heap *heap, const char *s);
 
 void z_str_append_cstr(Z_String *s, const char *cstr);
 void z_str_append_format(Z_String *s, const char *format, ...);
@@ -45,8 +46,8 @@ char z_str_pop_char(Z_String *s);
 void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement);
 void z_str_clear(Z_String *s);
 
-Z_Sv_Split_Iterator z_sv_split(Z_String_View s, Z_String_View delimeter);
-bool z_sv_split_next(Z_Sv_Split_Iterator *iterator, Z_String_View *next);
+Z_Sv_Split_Iter z_sv_split(Z_String_View s, Z_String_View delimeter);
+bool z_sv_split_next(Z_Sv_Split_Iter *iterator, Z_String_View *next);
 Z_String_View z_sv_split_part(Z_String_View s, Z_String_View delimiter, size_t index);
 
 void z_str_trim(Z_String *s);
