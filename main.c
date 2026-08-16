@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "zlib/include/z_file.h"
 #include "zlib/include/z_string.h"
 #include "zlib/include/z_hash_table.h"
@@ -10,7 +11,6 @@
 #include "zlib/include/z_error.h"
 #include "zlib/include/z_env.h"
 #include "zlib/include/z_time.h"
-#include <linux/limits.h>
 
 typedef struct {
     Z_Heap *heap;
@@ -29,7 +29,7 @@ void remove_field_codes(Z_String *command)
     z_str_trim(command);
 }
 
-bool proccess_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
+bool process_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
 {
     Z_Heap_Auto scratch = {0};
     FILE *fp = fopen(pathname, "r");
@@ -71,7 +71,7 @@ bool is_desktop_file(Z_String_View path)
     return z_sv_ends_with(path, z_sv(".desktop"));
 }
 
-bool proccess_directory(Parse_Desktop_File_State *state, const char *pathname)
+bool fetch_desktop_files_from_directory(Parse_Desktop_File_State *state, const char *pathname)
 {
     Z_Heap_Auto scratch = {0};
     DIR *dir = opendir(pathname);
@@ -87,7 +87,7 @@ bool proccess_directory(Parse_Desktop_File_State *state, const char *pathname)
         z_str_append_format(&full_path, "%s/%s", pathname, entry->d_name);
 
         if (is_desktop_file(z_sv(full_path))) {
-            proccess_desktop_file(state, z_str_to_cstr(full_path));
+            process_desktop_file(state, z_str_to_cstr(full_path));
         }
 
         z_str_clear(&full_path);
@@ -98,8 +98,10 @@ bool proccess_directory(Parse_Desktop_File_State *state, const char *pathname)
     return true;
 }
 
-void proccess_directories(Parse_Desktop_File_State *state)
+void fetch_desktop_files(Parse_Desktop_File_State *state)
 {
+    Z_Clock start = z_get_clock();
+
     const char *dirs = z_try_get_env("XDG_DATA_DIRS", NULL);
 
     if (dirs == NULL) {
@@ -114,14 +116,17 @@ void proccess_directories(Parse_Desktop_File_State *state)
     while (z_sv_split_next(&iter, &dir)) {
         z_str_append_str(&dir_str, dir);
         z_str_append_cstr(&dir_str, "/applications");
-        proccess_directory(state, z_str_to_cstr(dir_str));
+        fetch_desktop_files_from_directory(state, z_str_to_cstr(dir_str));
         z_str_clear(&dir_str);
     }
+
+    double elapsed_seconds = z_clock_get_elapsed_seconds(start);
+    printf("Fetched %zu desktop applications in %lfs\n", state->table->size, elapsed_seconds);
 }
 
 char **build_dmenu_args(Z_Heap *heap, int argc, char **argv)
 {
-    char **dmenu = z_heap_malloc(heap, argc + 1);
+    char **dmenu = z_heap_malloc(heap, sizeof(char *) * argc + 1);
 
     dmenu[0] = z_cstr_dup(heap, "dmenu");
 
@@ -148,6 +153,41 @@ void print_dmenu_command(int argc, char **dmenu)
     printf("\"\n");
 }
 
+void pipe_program_names(Parse_Desktop_File_State *state, FILE *fp)
+{
+    Z_Hash_Table_Iter iter = z_hash_table_iter(state->table);
+    Z_Pair pair;
+
+    while (z_hash_table_iter_next(&iter, &pair)) {
+        fprintf(fp, "%s\n", (char *)pair.key);
+    }
+}
+
+int execute_program(const Parse_Desktop_File_State *state, const char *program_name)
+{
+    const char *exec = z_hash_table_get(state->table, program_name);
+
+    if (exec == NULL) {
+        z_die("No command found for name: \"%s\"\n", program_name);
+    }
+
+    Z_String command = z_str_new(state->heap, "%s", exec);
+    remove_field_codes(&command);
+    printf("Running: \"%s\"\n", command.ptr);
+
+    int pid = fork();
+
+    if (pid == -1) {
+        z_die("fork() failed\n");
+    }
+
+    if (pid == 0) {
+        return system(command.ptr);
+    }
+
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     Z_Heap_Auto heap = {0};
@@ -158,23 +198,13 @@ int main(int argc, char **argv)
         .table = &table,
     };
 
-    Z_Clock start = z_get_clock();
-    proccess_directories(&state);
-    double elapsed_seconds = z_clock_get_elapsed_seconds(start);
-
-    printf("Fetched %zu desktop applications in %lfs\n", table.size, elapsed_seconds);
+    fetch_desktop_files(&state);
 
     char **dmenu_args = build_dmenu_args(state.heap, argc, argv);
     print_dmenu_command(argc, dmenu_args);
-    Z_Piped_Proccess dmenu = z_pipe_proccess(dmenu_args, Z_Redirect_Stdout | Z_Redirect_Stdin);
+    Z_Piped_Process dmenu = z_pipe_process(dmenu_args, Z_Redirect_Stdout | Z_Redirect_Stdin);
 
-    Z_Hash_Table_Iter iter = z_hash_table_iter(state.table);
-    Z_Pair pair;
-
-    while (z_hash_table_iter_next(&iter, &pair)) {
-        fprintf(dmenu.stdin, "%s\n", (char *)pair.key);
-    }
-
+    pipe_program_names(&state, dmenu.stdin);
     fclose(dmenu.stdin);
 
     Z_String selected_program = z_str_new(&heap, "");
@@ -187,10 +217,8 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    printf("Selected program: '%s'\n", selected_program.ptr);
-    Z_String command = z_str_new(state.heap, "%s", z_hash_table_get(state.table, selected_program.ptr));
-    remove_field_codes(&command);
-    printf("Running: '%s'\n", command.ptr);
+    printf("Selected program: \"%s\"\n", selected_program.ptr);
+    execute_program(&state, selected_program.ptr);
 
     return 0;
 }

@@ -47,7 +47,7 @@ void z__hash_table_free(Z_Hash_Table *table)
     z_heap_free(table->heap, table->hashes);
 }
 
-static inline size_t z__hash_table_hash(const Z_Hash_Table *table, void *key)
+static inline size_t z__hash_table_hash(const Z_Hash_Table *table, const void *key)
 {
     size_t hash = table->hash(key);
 
@@ -67,7 +67,7 @@ static inline float z__hash_table_get_load_factor(const Z_Hash_Table *table)
     return (float)table->occupied / (float)table->capacity;
 }
 
-void *z_hash_table_try_get(const Z_Hash_Table *table, void *key, void *fallback)
+void *z_hash_table_try_get(const Z_Hash_Table *table, const void *key, void *fallback)
 {
     if (table->capacity == 0) {
         return fallback;
@@ -88,7 +88,7 @@ void *z_hash_table_try_get(const Z_Hash_Table *table, void *key, void *fallback)
     return fallback;
 }
 
-void *z_hash_table_get(const Z_Hash_Table *table, void *key)
+void *z_hash_table_get(const Z_Hash_Table *table, const void *key)
 {
     return z_hash_table_try_get(table, key, NULL);
 }

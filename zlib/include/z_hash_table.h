@@ -42,8 +42,8 @@ typedef struct {
 Z_Pair z_make_pair(void *key, void *value);
 Z_Hash_Table z_hash_table_new(Z_Heap *heap, Z_Equal_Fn equal, Z_Hash_Fn hash);
 Z_Hash_Table z_hash_table_new_with_capacity(Z_Heap *heap, Z_Equal_Fn equal, Z_Hash_Fn hash, size_t capacity);
-void *z_hash_table_get(const Z_Hash_Table *table, void *key);
-void *z_hash_table_try_get(const Z_Hash_Table *table, void *key, void *fallback);
+void *z_hash_table_get(const Z_Hash_Table *table, const void *key);
+void *z_hash_table_try_get(const Z_Hash_Table *table, const void *key, void *fallback);
 bool z_hash_table_put(Z_Hash_Table *table, void *key, void *value, Z_Pair *pair);
 bool z_hash_table_delete(Z_Hash_Table *table, void *key, Z_Pair *pair);
 bool z_hash_table_contains(const Z_Hash_Table *table, void *key);

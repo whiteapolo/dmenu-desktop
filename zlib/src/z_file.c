@@ -115,7 +115,7 @@ int z_safe_fork(void)
     return pid;
 }
 
-Z_Piped_Proccess z_pipe_proccess(char *args[], Z_Redirect redirect)
+Z_Piped_Process z_pipe_process(char *args[], Z_Redirect redirect)
 {
     int stdin[2];
     int stdout[2];
@@ -148,7 +148,7 @@ Z_Piped_Proccess z_pipe_proccess(char *args[], Z_Redirect redirect)
         exit(EXIT_FAILURE);
     }
 
-    Z_Piped_Proccess piped_process = {0};
+    Z_Piped_Process piped_process = {0};
 
     if (redirect & Z_Redirect_Stdin) {
         close(stdin[PIPE_OUT]);

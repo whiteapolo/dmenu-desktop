@@ -15,14 +15,14 @@ typedef struct {
     FILE *stdin;
     FILE *stdout;
     FILE *stderr;
-} Z_Piped_Proccess;
+} Z_Piped_Process;
 
 bool z_file_write(const char *pathname, const char *format, ...);
 bool z_file_append(const char *pathname, const char *format, ...);
 bool z_file_scanf(const char *pathname, const char *format, ...);
 
 size_t z_file_read_line(FILE *fp, Z_String *out);
-Z_Piped_Proccess z_pipe_proccess(char *args[], Z_Redirect redirect);
+Z_Piped_Process z_pipe_process(char *args[], Z_Redirect redirect);
 
 // TODO: fix
 // Z_Maybe_String_Array z_read_directory(Z_Heap *heap, const char *pathname);

@@ -1,0 +1,243 @@
+Fetched 239 desktop applications in 0.006371s
+dmenu: "dmenu"
+/usr/bin/gcr-viewer
+gtk4-widget-factory
+keditbookmarks
+remote-viewer %u
+celluloid %U
+time-admin
+cinnamon-settings general
+gnome-control-center mouse
+fish
+/usr/libexec/evolution-data-server/evolution-alarm-notify
+nemo-autorun-software %u
+cinnamon-settings gestures
+nemo %U
+libreoffice --writer %U
+gnome-control-center diagnostics
+/usr/bin/catfish %f
+xfce4-session-logout
+/usr/bin/flatpak run --branch
+cmatrix
+kde-geo-uri-handler --coordinate-template "https://www.qwant.com/maps/#map
+cinnamon-settings desklets
+gnome-control-center color
+driver-manager
+minecraft-launcher
+/usr/bin/mugshot
+cinnamon-settings wacom
+gnome-control-center power
+xfwm4-settings
+cinnamon-settings user
+gnome-logs
+gnome-disk-image-mounter %U
+picom
+gnome-control-center multitasking
+cinnamon-settings fonts
+exo-open --launch TerminalEmulator
+shares-admin
+cinnamon-settings hotcorner
+texdoctk
+cinnamon-settings sound
+/usr/lib/qt5/bin/linguist %F
+cinnamon-settings windows
+xfce4-appfinder
+gtk4-icon-browser
+alacritty
+/usr/bin/light-locker-settings
+copyq --start-server show
+webapp-manager
+libreoffice --base %U
+pcmanfm %U
+xfce4-screenshooter
+xscreensaver-demo
+/usr/bin/x-terminal-emulator
+cinnamon-settings default
+gnome-control-center applications
+cinnamon-settings power
+/usr/bin/display-im6.q16 -nostdin %F
+mintwelcome
+/home/white/.cargo/bin/neovide
+pkexec lightdm-settings
+cinnamon-settings backgrounds
+/usr/share/foo2zjs/hplj10xx_gui.tcl
+exo-open --launch MailReader %u
+gnome-control-center printers
+apturl %u
+sh -c 'STEAM_FRAME_FORCE_CLOSE
+mousepad %U
+/usr/bin/flatpak run --branch
+thunar --bulk-rename %F
+ktelnetservice5 %u
+cinnamon-settings network
+/usr/bin/python3.10
+pcmanfm --desktop-pref
+/usr/lib/qt5/bin/designer %F
+kwalletd5
+timeshift-launcher
+xfce4-panel --preferences
+xdg-open /usr/share/dmd/html/d/spec/spec.html
+/usr/libexec/xdg-desktop-portal-gtk
+compiz
+/usr/libexec/gcr-prompter
+gtk4-print-editor %f
+onboard-settings
+gimp-2.10 %U
+gnome-control-center wifi
+/usr/bin/x-www-browser %u
+mate-about
+libreoffice --math %U
+ibus-setup
+gnome-control-center default-apps
+gnome-control-center sharing
+nvim %F
+vim %F
+mintreport
+kitty
+gnome-control-center search
+xfce4-appfinder --collapsed
+redshift
+mousepad --preferences
+gnome-control-center connectivity
+mpv --player-operation-mode
+chromium %U
+lxappearance
+gnome-control-center universal-access
+yelp help:mate-user-guide
+gnome-font-viewer %u
+gnome-control-center thunderbolt
+gnome-calculator
+bulky
+gnome-control-center region
+blueman-adapters
+xreader %U
+cinnamon-settings notifications
+cinnamon-settings desktop
+mintstick -m format
+lxsession-default-apps
+cinnamon-settings privacy
+ibus emoji
+zathura %U
+/usr/bin/emacs %F
+xfce4-color-settings
+rygel
+peek
+xfce4-session-settings
+window-manager-launcher
+gtk4-demo
+xfce4-settings-manager
+cinnamon-killer-daemon
+gkbd-keyboard-display
+cinnamon-settings calendar
+xfce4-panel --add
+gnome-control-center wacom
+gnome-control-center microphone
+cinnamon-settings startup
+exo-open --launch FileManager %u
+gnome-control-center usage
+htop
+cinnamon-settings online-accounts
+mintinstall
+pix --import-photos %U
+gucharmap
+thunar-settings
+xterm
+ccsm
+thingy
+mintbackup
+urxvt
+xfce4-settings-editor
+/usr/lib/qt5/bin/assistant
+gnome-control-center removable-media
+gnome-control-center lock
+/usr/bin/gnome-language-selector
+/usr/bin/flameshot
+uxterm
+libreoffice --draw %U
+simple-scan
+xfce4-power-manager-settings
+thunar %U
+nemo-desktop
+pix %U
+synaptic-pkexec
+xfce4-mouse-settings
+mate-color-select
+mintlocale
+/usr/libexec/geoclue-2.0/demos/agent
+cinnamon-settings applets
+gnome-terminal
+thunar-volman-settings
+libreoffice --impress %U
+metacity
+xfwm4-tweaks-settings
+onboard
+kde-geo-uri-handler --coordinate-template "https://www.openstreetmap.org/#map
+gnome-control-center display
+gnome-disks --restore-disk-image %U
+pkexec mintsources
+xfce4-keyboard-settings
+gnome-control-center user-accounts
+pavucontrol
+qtcreator %F
+xfce4-dict
+seahorse
+dbus-send --print-reply --dest
+compton
+gnome-control-center background
+cinnamon-settings themes
+/usr/bin/flatpak run --branch
+cinnamon-settings extensions
+im-config
+/usr/bin/flatpak run --branch
+apturl apt://mint-meta-codecs?refresh
+firefox %u
+xfce4-display-settings
+/usr/bin/emacs -nw %F
+gnome-control-center location
+mintupdate
+gnome-control-center wwan
+kcmshell5 kcm_trash
+baobab %U
+qt5ct
+gedit %U
+mintlocale-im
+blueman-manager
+xfce4-terminal --preferences
+cautious-launcher %f /usr/bin/java -jar
+gnome-control-center bluetooth
+cautious-launcher %f /usr/bin/java -jar
+/usr/bin/menulibre
+kcolorchooser
+file-roller %U
+libreoffice %U
+cinnamon-settings tiling
+gnome-disks
+xfce4-terminal
+kde-geo-uri-handler --coordinate-template "https://wheelmap.org/?lat
+/usr/bin/cinnamon2d
+cinnamon-menu-editor
+cinnamon-settings
+gnome-control-center info-overview
+info
+cinnamon-settings effects
+cinnamon-settings-users
+gnome-control-center camera
+mintdesktop
+libreoffice --calc %U
+/usr/bin/cinnamon-launcher
+cinnamon-settings workspaces
+mypaint %f
+/usr/share/code/code --open-url %U
+rhythmbox-client --select-source %U
+/usr/share/code/code %F
+mintstick -m iso
+kde-geo-uri-handler --coordinate-template "https://www.google.com/maps/@<LAT>,<LON>,<Z>" --query-template "https://www.google.com/maps/search/<Q>" --fallback "https://www.google.com/maps/" %u
+xfce4-appearance-settings
+cinnamon-settings info
+gnome-control-center
+gdebi-gtk %f
+virt-manager
+nm-connection-editor
+libreoffice %U
+Selected program: "View file"
+Running: "/usr/bin/gcr-viewer"
