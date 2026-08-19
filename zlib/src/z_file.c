@@ -84,6 +84,8 @@ size_t z_file_read_line(FILE *fp, Z_String *out)
     char buffer[READ_BUFFER_SIZE] = {0};
     size_t start_length = out->length;
 
+    z_str_clear(out);
+
     while (fgets(buffer, READ_BUFFER_SIZE, fp)) {
         z_str_append_cstr(out, buffer);
 

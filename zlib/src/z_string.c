@@ -518,3 +518,17 @@ void z_str_clear(Z_String *s)
     s->length = 0;
     z_array_zero_terminate(s);
 }
+
+void z_str_set_format(Z_String *s, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    z_str_set_format_va(s, format, args);
+    va_end(args);
+}
+
+void z_str_set_format_va(Z_String *s, const char *format, va_list args)
+{
+    z_str_clear(s);
+    z_str_append_format_va(s, format, args);
+}

@@ -50,8 +50,6 @@ bool process_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
         } else if (z_sv_like(line_sv, z_sv("Exec=%")) && exec.length == 0) {
             z_str_append_str(&exec, z_sv_trim(z_sv_split_part(line_sv, z_sv("="), 1)));
         }
-
-        z_str_clear(&line);
     }
 
     fclose(fp);
@@ -84,13 +82,11 @@ bool fetch_desktop_files_from_directory(Parse_Desktop_File_State *state, const c
     struct dirent *entry;
 
     while ((entry = readdir(dir))) {
-        z_str_append_format(&full_path, "%s/%s", pathname, entry->d_name);
+        z_str_set_format(&full_path, "%s/%s", pathname, entry->d_name);
 
         if (is_desktop_file(z_sv(full_path))) {
             process_desktop_file(state, z_str_to_cstr(full_path));
         }
-
-        z_str_clear(&full_path);
     }
 
     closedir(dir);
@@ -114,10 +110,8 @@ void fetch_desktop_files(Parse_Desktop_File_State *state)
     Z_String dir_str = z_str_new(&scratch, "");
 
     while (z_sv_split_next(&iter, &dir)) {
-        z_str_append_str(&dir_str, dir);
-        z_str_append_cstr(&dir_str, "/applications");
+        z_str_set_format(&dir_str, "%.*s/applications", dir.length, dir.ptr);
         fetch_desktop_files_from_directory(state, z_str_to_cstr(dir_str));
-        z_str_clear(&dir_str);
     }
 
     double elapsed_seconds = z_clock_get_elapsed_seconds(start);
@@ -142,15 +136,12 @@ char **build_dmenu_args(Z_Heap *heap, int argc, char **argv)
 void print_dmenu_command(int argc, char **dmenu)
 {
     printf("dmenu: \"");
-    for (int i = 0; i < argc; i++) {
-        if (i < argc - 1) {
-            printf("%s ", dmenu[i]);
-        } else {
-            printf("%s", dmenu[i]);
-        }
+
+    for (int i = 0; i < argc - 1; i++) {
+        printf("%s ", dmenu[i]);
     }
 
-    printf("\"\n");
+    printf("%s\"\n", dmenu[argc - 1]);
 }
 
 void pipe_program_names(Parse_Desktop_File_State *state, FILE *fp)
@@ -203,7 +194,6 @@ int main(int argc, char **argv)
     char **dmenu_args = build_dmenu_args(state.heap, argc, argv);
     print_dmenu_command(argc, dmenu_args);
     Z_Piped_Process dmenu = z_pipe_process(dmenu_args, Z_Redirect_Stdout | Z_Redirect_Stdin);
-
     pipe_program_names(&state, dmenu.stdin);
     fclose(dmenu.stdin);
 

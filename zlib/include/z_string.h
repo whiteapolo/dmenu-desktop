@@ -45,6 +45,8 @@ void z_str_prepend_char(Z_String *s, char c);
 char z_str_pop_char(Z_String *s);
 void z_str_replace(Z_String *s, Z_String_View target, Z_String_View replacement);
 void z_str_clear(Z_String *s);
+void z_str_set_format(Z_String *s, const char *format, ...);
+void z_str_set_format_va(Z_String *s, const char *format, va_list args);
 
 Z_Sv_Split_Iter z_sv_split(Z_String_View s, Z_String_View delimeter);
 bool z_sv_split_next(Z_Sv_Split_Iter *iterator, Z_String_View *next);
