@@ -114,8 +114,8 @@ void fetch_desktop_files(Parse_Desktop_File_State *state)
         fetch_desktop_files_from_directory(state, z_str_to_cstr(dir_str));
     }
 
-    double elapsed_seconds = z_clock_get_elapsed_seconds(start);
-    printf("Fetched %zu desktop applications in %lfs\n", state->table->size, elapsed_seconds);
+    double ms = z_clock_get_elapsed_mseconds(start);
+    printf("Loaded %zu apps in %.1lfms\n", state->table->size, ms);
 }
 
 char **build_dmenu_args(Z_Heap *heap, int argc, char **argv)
@@ -135,13 +135,13 @@ char **build_dmenu_args(Z_Heap *heap, int argc, char **argv)
 
 void print_dmenu_command(int argc, char **dmenu)
 {
-    printf("dmenu: \"");
+    printf("dmenu: ");
 
     for (int i = 0; i < argc - 1; i++) {
         printf("%s ", dmenu[i]);
     }
 
-    printf("%s\"\n", dmenu[argc - 1]);
+    printf("%s\n", dmenu[argc - 1]);
 }
 
 void pipe_program_names(Parse_Desktop_File_State *state, FILE *fp)
@@ -164,7 +164,7 @@ int execute_program(const Parse_Desktop_File_State *state, const char *program_n
 
     Z_String command = z_str_new(state->heap, "%s", exec);
     remove_field_codes(&command);
-    printf("Running: \"%s\"\n", command.ptr);
+    printf("Running: %s\n", command.ptr);
 
     int pid = fork();
 
@@ -203,11 +203,11 @@ int main(int argc, char **argv)
     fclose(dmenu.stdout);
 
     if (selected_program.length == 0) {
-        printf("No program was selected\n");
+        printf("Cancel.\n");
         return 0;
     }
 
-    printf("Selected program: \"%s\"\n", selected_program.ptr);
+    printf("Selected: %s\n", selected_program.ptr);
     execute_program(&state, selected_program.ptr);
 
     return 0;
