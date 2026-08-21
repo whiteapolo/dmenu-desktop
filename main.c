@@ -106,10 +106,10 @@ void get_desktop_file_dirs(Z_String_Array *out)
     const char *XDG_DATA_HOME = z_try_get_env("XDG_DATA_HOME", XDG_DATA_HOME_fallback.ptr);
 
     z_array_push(out, z_str_new_from_sv(out->heap, z_sv(XDG_DATA_HOME)));
-    Z_Sv_Split_Iter iter = z_sv_split(z_sv(XDG_DATA_DIRS), z_sv(":"));
+    Z_Sv_Split_Iter iter = z_sv_split_iter(z_sv(XDG_DATA_DIRS), z_sv(":"));
     Z_String_View dir;
 
-    while (z_sv_split_next(&iter, &dir)) {
+    while (z_sv_split_iter_next(&iter, &dir)) {
         if (dir.length > 0) {
             z_array_push(out, z_str_new(out->heap, "%.*s/applications", dir.length, dir.ptr));
         }
