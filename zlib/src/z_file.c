@@ -169,3 +169,17 @@ Z_Piped_Process z_pipe_process(char *args[], Z_Redirect redirect)
 
     return piped_process;
 }
+
+void z__file_auto_cleanup(FILE **fp)
+{
+    if (fp && *fp) {
+        fclose(*fp);
+    }
+}
+
+void z__dir_auto_cleanup(DIR **dir)
+{
+    if (dir && *dir) {
+        closedir(*dir);
+    }
+}

@@ -33,7 +33,7 @@ void remove_field_codes(Z_String *command)
 bool process_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
 {
     Z_Heap_Auto scratch = {0};
-    FILE *fp = fopen(pathname, "r");
+    Z_File_Auto *fp = fopen(pathname, "r");
 
     if (fp == NULL) {
         return false;
@@ -53,8 +53,6 @@ bool process_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
         }
     }
 
-    fclose(fp);
-
     if (name.length && exec.length) {
         Z_String key = z_str_new_from_sv(state->heap, z_sv(name));
         Z_String value = z_str_new_from_sv(state->heap, z_sv(exec));
@@ -73,7 +71,7 @@ bool is_desktop_file(Z_String_View path)
 bool fetch_desktop_files_from_directory(Parse_Desktop_File_State *state, const char *pathname)
 {
     Z_Heap_Auto scratch = {0};
-    DIR *dir = opendir(pathname);
+    Z_Dir_Auto *dir = opendir(pathname);
 
     if (!dir) {
         return false;
@@ -90,8 +88,6 @@ bool fetch_desktop_files_from_directory(Parse_Desktop_File_State *state, const c
         }
     }
 
-    closedir(dir);
-
     return true;
 }
 
@@ -99,13 +95,11 @@ void get_desktop_file_dirs(Z_String_Array *out)
 {
     Z_Heap_Auto heap = {0};
 
-    Z_String XDG_DATA_HOME_fallback = z_str_new(&heap, "%s/.local/share", z_try_get_env("HOME", "."));
-    Z_String XDG_DATA_DIRS_fallback = z_str_new(&heap, "/usr/local/share:/usr/share");
+    const char *HOME = z_try_get_env("HOME", ".");
+    const char *XDG_DATA_HOME = z_try_get_env("XDG_DATA_HOME", z_str_new(&heap, "%s/.local/share/applications", HOME).ptr);
+    const char *XDG_DATA_DIRS = z_try_get_env("XDG_DATA_DIRS", "/usr/local/share:/usr/share");
 
-    const char *XDG_DATA_DIRS = z_try_get_env("XDG_DATA_DIRS", XDG_DATA_DIRS_fallback.ptr);
-    const char *XDG_DATA_HOME = z_try_get_env("XDG_DATA_HOME", XDG_DATA_HOME_fallback.ptr);
-
-    z_array_push(out, z_str_new_from_sv(out->heap, z_sv(XDG_DATA_HOME)));
+    z_array_push(out, z_str_new(out->heap, "%s", XDG_DATA_HOME));
     Z_Sv_Split_Iter iter = z_sv_split_iter(z_sv(XDG_DATA_DIRS), z_sv(":"));
     Z_String_View dir;
 
@@ -171,7 +165,7 @@ int execute_program(const Parse_Desktop_File_State *state, const char *program_n
     const char *exec = z_hash_table_get(state->table, program_name);
 
     if (exec == NULL) {
-        z_die("No command found for name: \"%s\"\n", program_name);
+        z_die("Not found: %s\n", program_name);
     }
 
     Z_String command = z_str_new(state->heap, "%s", exec);
