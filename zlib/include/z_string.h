@@ -51,6 +51,7 @@ void z_str_set_format_va(Z_String *s, const char *format, va_list args);
 Z_Sv_Split_Iter z_sv_split(Z_String_View s, Z_String_View delimeter);
 bool z_sv_split_next(Z_Sv_Split_Iter *iterator, Z_String_View *next);
 Z_String_View z_sv_split_part(Z_String_View s, Z_String_View delimiter, size_t index);
+void z_str_split(Z_String_View s, Z_String_View delimiter, Z_String_Array *out);
 
 void z_str_trim(Z_String *s);
 void z_str_trim_cset(Z_String *s, Z_String_View cset);

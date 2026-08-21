@@ -2,6 +2,7 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "zlib/include/z_array.h"
 #include "zlib/include/z_file.h"
 #include "zlib/include/z_string.h"
 #include "zlib/include/z_hash_table.h"
@@ -55,9 +56,9 @@ bool process_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
     fclose(fp);
 
     if (name.length && exec.length) {
-        char *key = z_str_to_cstr(z_str_new_from_sv(state->heap, z_sv(name)));
-        char *value = z_str_to_cstr(z_str_new_from_sv(state->heap, z_sv(exec)));
-        z_hash_table_put(state->table, key, value, NULL);
+        Z_String key = z_str_new_from_sv(state->heap, z_sv(name));
+        Z_String value = z_str_new_from_sv(state->heap, z_sv(exec));
+        z_hash_table_put(state->table, key.ptr, value.ptr, NULL);
         return true;
     }
 
@@ -85,7 +86,7 @@ bool fetch_desktop_files_from_directory(Parse_Desktop_File_State *state, const c
         z_str_set_format(&full_path, "%s/%s", pathname, entry->d_name);
 
         if (is_desktop_file(z_sv(full_path))) {
-            process_desktop_file(state, z_str_to_cstr(full_path));
+            process_desktop_file(state, full_path.ptr);
         }
     }
 
@@ -94,28 +95,39 @@ bool fetch_desktop_files_from_directory(Parse_Desktop_File_State *state, const c
     return true;
 }
 
-void fetch_desktop_files(Parse_Desktop_File_State *state)
+void get_desktop_file_dirs(Z_String_Array *out)
 {
-    Z_Clock start = z_get_clock();
+    Z_Heap_Auto heap = {0};
 
-    const char *dirs = z_try_get_env("XDG_DATA_DIRS", NULL);
+    Z_String XDG_DATA_HOME_fallback = z_str_new(&heap, "%s/.local/share", z_try_get_env("HOME", "."));
+    Z_String XDG_DATA_DIRS_fallback = z_str_new(&heap, "/usr/local/share:/usr/share");
 
-    if (dirs == NULL) {
-        z_die("XDG_DATA_DIRS is not defined\n");
-    }
+    const char *XDG_DATA_DIRS = z_try_get_env("XDG_DATA_DIRS", XDG_DATA_DIRS_fallback.ptr);
+    const char *XDG_DATA_HOME = z_try_get_env("XDG_DATA_HOME", XDG_DATA_HOME_fallback.ptr);
 
-    Z_Heap_Auto scratch = {0};
-    Z_Sv_Split_Iter iter = z_sv_split(z_sv(dirs), z_sv(":"));
+    z_array_push(out, z_str_new_from_sv(out->heap, z_sv(XDG_DATA_HOME)));
+    Z_Sv_Split_Iter iter = z_sv_split(z_sv(XDG_DATA_DIRS), z_sv(":"));
     Z_String_View dir;
-    Z_String dir_str = z_str_new(&scratch, "");
 
     while (z_sv_split_next(&iter, &dir)) {
-        z_str_set_format(&dir_str, "%.*s/applications", dir.length, dir.ptr);
-        fetch_desktop_files_from_directory(state, z_str_to_cstr(dir_str));
+        if (dir.length > 0) {
+            z_array_push(out, z_str_new(out->heap, "%.*s/applications", dir.length, dir.ptr));
+        }
+    }
+}
+
+void fetch_desktop_files(Parse_Desktop_File_State *state)
+{
+    Z_Heap_Auto scratch = {0};
+    Z_Clock start = z_get_clock();
+    Z_String_Array dirs = z_array_new(&scratch, Z_String_Array);
+    get_desktop_file_dirs(&dirs);
+
+    for (size_t i = 0; i < dirs.length; i++) {
+        fetch_desktop_files_from_directory(state, dirs.ptr[i].ptr);
     }
 
-    double ms = z_clock_get_elapsed_mseconds(start);
-    printf("Loaded %zu apps in %.1lfms\n", state->table->size, ms);
+    printf("Loaded %zu apps in %.1lfms\n", state->table->size, z_clock_get_elapsed_mseconds(start));
 }
 
 char **build_dmenu_args(Z_Heap *heap, int argc, char **argv)

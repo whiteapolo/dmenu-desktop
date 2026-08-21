@@ -212,6 +212,16 @@ bool z_sv_split_next(Z_Sv_Split_Iter *iterator, Z_String_View *slice)
     return true;
 }
 
+void z_str_split(Z_String_View s, Z_String_View delimiter, Z_String_Array *out)
+{
+    Z_Sv_Split_Iter iter = z_sv_split(s, delimiter);
+    Z_String_View curr;
+
+    while (z_sv_split_next(&iter, &curr)) {
+        z_array_push(out, z_str_new_from_sv(out->heap, curr));
+    }
+}
+
 Z_String_View z_sv_split_part(Z_String_View s, Z_String_View delimiter, size_t index)
 {
     Z_Sv_Split_Iter iter = z_sv_split(s, delimiter);
