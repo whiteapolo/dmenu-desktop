@@ -63,11 +63,6 @@ bool process_desktop_file(Parse_Desktop_File_State *state, const char *pathname)
     return false;
 }
 
-bool is_desktop_file(Z_String_View path)
-{
-    return z_sv_ends_with(path, z_sv(".desktop"));
-}
-
 bool fetch_desktop_files_from_directory(Parse_Desktop_File_State *state, const char *pathname)
 {
     Z_Heap_Auto scratch = {0};
@@ -83,7 +78,7 @@ bool fetch_desktop_files_from_directory(Parse_Desktop_File_State *state, const c
     while ((entry = readdir(dir))) {
         z_str_set_format(&full_path, "%s/%s", pathname, entry->d_name);
 
-        if (is_desktop_file(z_sv(full_path))) {
+        if (z_sv_ends_with(z_sv(full_path), z_sv(".desktop"))) {
             process_desktop_file(state, full_path.ptr);
         }
     }
@@ -172,22 +167,12 @@ int execute_program(const Parse_Desktop_File_State *state, const char *program_n
     remove_field_codes(&command);
     printf("Running: %s\n", command.ptr);
 
-    int pid = fork();
-
-    if (pid == -1) {
-        z_die("fork() failed\n");
-    }
-
-    if (pid == 0) {
-        return system(command.ptr);
-    }
-
-    return 0;
+    return system(command.ptr);
 }
 
 int main(int argc, char **argv)
 {
-    Z_Heap_Auto heap = {0};
+    Z_Heap heap = {0};
     Z_Hash_Table table = z_hash_table_new(&heap, z_str_equal, z_str_hash);
 
     Parse_Desktop_File_State state = {
