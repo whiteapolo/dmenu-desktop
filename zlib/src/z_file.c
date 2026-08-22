@@ -82,8 +82,6 @@ bool z_file_scanf(const char *pathname, const char *format, ...)
 size_t z_file_read_line(FILE *fp, Z_String *out)
 {
     char buffer[READ_BUFFER_SIZE] = {0};
-    size_t start_length = out->length;
-
     z_str_clear(out);
 
     while (fgets(buffer, READ_BUFFER_SIZE, fp)) {
@@ -94,7 +92,7 @@ size_t z_file_read_line(FILE *fp, Z_String *out)
         }
     }
 
-    return out->length - start_length;
+    return out->length;
 }
 
 void z_safe_pipe(int fd[2])
