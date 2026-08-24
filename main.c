@@ -155,19 +155,30 @@ void pipe_program_names(Parse_Desktop_File_State *state, FILE *fp)
     }
 }
 
-int execute_program(const Parse_Desktop_File_State *state, const char *program_name)
+void execute_program(const Parse_Desktop_File_State *state, const char *program_name)
 {
     const char *exec = z_hash_table_get(state->table, program_name);
 
     if (exec == NULL) {
-        z_die("Not found: %s\n", program_name);
+        z_die("You forgot to select you silly :)\n");
     }
+
+    printf("Selected: %s\n", program_name);
 
     Z_String command = z_str_new(state->heap, "%s", exec);
     remove_field_codes(&command);
     printf("Running: %s\n", command.ptr);
 
-    return system(command.ptr);
+    int pid = fork();
+
+    if (pid == -1) {
+        z_die("Fork() Failed :(\n");
+    }
+
+    if (pid == 0) {
+        execl("/bin/sh", "sh", "-c", command.ptr, NULL);
+        z_die("Exec(/bin/sh -c %s) Failed :(\n", command.ptr);
+    }
 }
 
 int main(int argc, char **argv)
@@ -194,11 +205,9 @@ int main(int argc, char **argv)
     fclose(dmenu.stdout);
 
     if (selected_program.length == 0) {
-        printf("Cancel.\n");
         return 0;
     }
 
-    printf("Selected: %s\n", selected_program.ptr);
     execute_program(&state, selected_program.ptr);
 
     return 0;
